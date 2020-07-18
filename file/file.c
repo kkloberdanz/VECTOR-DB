@@ -108,14 +108,14 @@ int main(void) {
     }
 
     for (i = 0; i < 10; i++) {
-        printf("%c", (file->dat + 40)[i]);
+        fprintf(stderr, "%c", (file->dat + 40)[i]);
     }
-    puts("\nEND\n");
 
     memcpy(file->dat + 10, str, len);
 
     if (kt_file_free(file)) {
-        const char *msg = "*** Very bad things have happened, data lost ***";
+        const char *msg = "*** Very bad things have happened, "
+            "data lost, failed to write to disk ***";
         fprintf(stderr, "%s\n", msg);
         status = -1;
     }
