@@ -47,7 +47,7 @@ struct kt_file *kt_mmap(const char *fname) {
     struct kt_file *file;
 
     if (fd == -1) {
-        goto return_fail;
+        goto fail;
     }
 
     fstat(fd, &statbuf);
@@ -78,15 +78,21 @@ struct kt_file *kt_mmap(const char *fname) {
     }
 
     file = malloc(sizeof(*file));
+    if (!file) {
+        goto unmap_dat;
+    }
     file->fd = fd;
     file->dat = dat;
     file->map_size = map_size;
     return file;
 
+unmap_dat:
+    munmap(dat, map_size);
+
 close_fd:
     close(fd);
 
-return_fail:
+fail:
     return NULL;
 }
 
