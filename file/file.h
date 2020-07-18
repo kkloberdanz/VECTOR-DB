@@ -2,14 +2,6 @@
 #define KT_FILE_H
 
 #include <stdio.h>
-#include <stdlib.h>
-#include <err.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <sys/mman.h>
-#include <fcntl.h>
-#include <unistd.h>
-#include <string.h>
 
 struct kt_file {
     int fd;
