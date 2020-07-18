@@ -88,10 +88,8 @@ struct kt_file *kt_mmap(const char *fname) {
 
 unmap_dat:
     munmap(dat, map_size);
-
 close_fd:
     close(fd);
-
 fail:
     return NULL;
 }
