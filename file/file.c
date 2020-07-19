@@ -15,7 +15,6 @@
 
 int kt_file_free(struct kt_file *file) {
     if (file) {
-        close(file->fd);
         if (msync(file->dat, file->map_size, MS_SYNC) == -1) {
             perror("failed to write to disk");
             return -1;
@@ -25,6 +24,8 @@ int kt_file_free(struct kt_file *file) {
             perror("failed to unmap memory");
             return -2;
         }
+
+        close(file->fd);
 
         free(file);
     }
