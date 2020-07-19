@@ -27,6 +27,9 @@ int kt_file_free(struct kt_file *file) {
 
         close(file->fd);
 
+        free(file->col);
+        free(file->fname);
+        free(file->table);
         free(file);
     }
     return 0;
@@ -162,44 +165,94 @@ fail:
     return 0;
 }
 
-char *kt_find_file(const char *col, int row) {
+char kt_check_file(
+    const char *target_table,
+    const char *file_table,
+    const char *target_col,
+    const char *file_col,
+    int target_row,
+    int row_begin,
+    int row_end
+) {
+    if (strcmp(target_table, file_table)) {
+        return 0;
+    }
+
+    if (strcmp(target_col, file_col)) {
+        return 0;
+    }
+
+    if ((target_row < row_begin) || (target_row > row_end)) {
+        return 0;
+    }
+
+    return 1;
+}
+
+struct kt_file *kt_find_file(const char *table, const char *col, int row) {
     DIR *dir;
     struct dirent *ent;
-    char *fname;
     int rowbegin;
     int rowend;
     char *tablename = NULL;
     char *colname = NULL;
-
-    UNUSED(col);
-    UNUSED(row);
+    struct kt_file *file = NULL;
+    char *fname = NULL;
 
     if ((dir = opendir(storage_dir)) != NULL) {
         while ((ent = readdir(dir)) != NULL) {
-            printf("%s\n", ent->d_name);
             if (!kt_parse_data_filename(
-                ent->d_name,
-                &tablename,
-                &colname,
-                &rowbegin,
-                &rowend)
+                    ent->d_name,
+                    &tablename,
+                    &colname,
+                    &rowbegin,
+                    &rowend
+                )
             ) {
                 continue;
             } else {
-                printf("%s %s %d %d\n", tablename, colname, rowbegin, rowend);
-                /* TODO: find the file that contains the correct row and col */
-                free(tablename);
-                free(colname);
+                if (kt_check_file(
+                        table,
+                        tablename,
+                        col,
+                        colname,
+                        row,
+                        rowbegin,
+                        rowend)
+                ) {
+                    size_t dir_len = strlen(storage_dir);
+                    size_t dat_file_len = strlen(ent->d_name);
+                    fname = malloc(dir_len + dat_file_len + 2);
+                    if (!fname) {
+                        goto leave;
+                    }
+                    sprintf(fname, "%s/%s", storage_dir, ent->d_name);
+                    file = kt_mmap(fname);
+                    if (!file) {
+                        goto free_fname;
+                    }
+                    file->col = colname;
+                    file->table = tablename;
+                    file->row_begin = rowbegin;
+                    file->row_end = rowend;
+                    file->fname = fname;
+                    goto leave;
+                } else {
+                    free(tablename);
+                    free(colname);
+                    tablename = NULL;
+                    colname = NULL;
+                }
             }
         }
-        fname = calloc(1, sizeof(char));
     } else {
         perror("failed to open storage directory");
-        fname = NULL;
     }
-
+free_fname:
+    free(fname);
+leave:
     closedir(dir);
-    return fname;
+    return file;
 }
 
 #ifdef KT_TEST_MMAP
@@ -209,13 +262,12 @@ int main(void) {
     const char *str = "this is some data";
     size_t len = strlen(str);
     int status = 0;
-    char *fname = NULL;
 
-    file = kt_mmap("tmp.dat");
+    file = kt_find_file("employee", "A", 30);
     if (!file) {
         return -1;
     }
-
+    printf("found data file: '%s'\n", file->fname);
     for (i = 0; i < 10; i++) {
         fprintf(stderr, "%c", (file->dat + 40)[i]);
     }
@@ -228,8 +280,6 @@ int main(void) {
         fprintf(stderr, "%s\n", msg);
         status = -1;
     }
-    fname = kt_find_file("A", 30);
-    free(fname);
     return status;
 }
 #endif
