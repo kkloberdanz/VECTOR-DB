@@ -27,7 +27,6 @@ int kt_file_free(struct kt_file *file) {
 
         close(file->fd);
 
-        free(file->col);
         free(file->fname);
         free(file->table);
         free(file);
@@ -111,16 +110,14 @@ enum State {
 static char kt_parse_data_filename(
     const char *str,
     char **tablename,
-    char **colname,
+    int *colname,
     int *rowbegin,
     int *rowend
 ) {
     int i;
-    int j;
     int idx;
     enum State state = TABLE_NAME;
     *tablename = NULL;
-    *colname = NULL;
     for (i = 0; str[i] != '\0'; i++) {
         if ((str[i] == '-') || (str[i] == '.')) {
             switch (state) {
@@ -133,9 +130,10 @@ static char kt_parse_data_filename(
 
                 case COL_NAME:
                     i++;
-                    *colname = strdup(str + idx);
-                    for (j = 0; (*colname)[j] != '-'; j++);
-                    (*colname)[j] = '\0';
+                    *colname = strtol(str + idx, NULL, 10);
+                    if (errno == ERANGE) {
+                        goto fail;
+                    }
                     state++;
                     idx = i;
                     break;
@@ -161,15 +159,14 @@ static char kt_parse_data_filename(
     }
 fail:
     free(*tablename);
-    free(*colname);
     return 0;
 }
 
 char kt_check_file(
     const char *target_table,
     const char *file_table,
-    const char *target_col,
-    const char *file_col,
+    int target_col,
+    int file_col,
     int target_row,
     int row_begin,
     int row_end
@@ -178,7 +175,7 @@ char kt_check_file(
         return 0;
     }
 
-    if (strcmp(target_col, file_col)) {
+    if (target_col != file_col) {
         return 0;
     }
 
@@ -189,13 +186,13 @@ char kt_check_file(
     return 1;
 }
 
-struct kt_file *kt_find_file(const char *table, const char *col, int row) {
+struct kt_file *kt_find_file(const char *table, int col, int row) {
     DIR *dir;
     struct dirent *ent;
     int rowbegin;
     int rowend;
+    int colname;
     char *tablename = NULL;
-    char *colname = NULL;
     struct kt_file *file = NULL;
     char *fname = NULL;
 
@@ -239,9 +236,7 @@ struct kt_file *kt_find_file(const char *table, const char *col, int row) {
                     goto leave;
                 } else {
                     free(tablename);
-                    free(colname);
                     tablename = NULL;
-                    colname = NULL;
                 }
             }
         }
@@ -263,8 +258,9 @@ int main(void) {
     size_t len = strlen(str);
     int status = 0;
 
-    file = kt_find_file("employee", "A", 30);
+    file = kt_find_file("employee", 0, 30);
     if (!file) {
+        fprintf(stderr, "could not find data file\n");
         return -1;
     }
     printf("found data file: '%s'\n", file->fname);
