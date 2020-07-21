@@ -13,6 +13,30 @@
 #include "file.h"
 #include "../globals.h"
 
+/**
+ * The storage file consists of
+ * 1) Header - contains enum of what kind of storage and version number
+ * 2) Type Info - byte stream of enumerations of which type each cell in the
+ *    data section are.
+ *    Type Info abbreviated as ti, data section abbreviated as d
+ *        ti[0] -> typeof(d[0])
+ *        ti[1] -> typeof(d[1])
+ *        ti[2] -> typeof(d[2])
+ * 3) Data - contains the actual data being stored. Each cell in the data
+ *    section is 8 bytes. The type of each cell can vary. It could be an int64,
+ *    float64, the name of the file containing a string, etc
+ */
+static int kt_file_set_segment_pointers(struct kt_file *file) {
+    char *header = file->dat;
+    char *ti = file->dat + 8;
+    char *d = file->dat + 29126;
+
+    file->header = header;
+    file->type_info = ti;
+    file->data.as_void = d;
+    return 0;
+}
+
 int kt_file_free(struct kt_file *file) {
     if (file) {
         if (msync(file->dat, file->map_size, MS_SYNC) == -1) {
@@ -90,6 +114,7 @@ struct kt_file *kt_mmap(const char *fname) {
     file->fd = fd;
     file->dat = dat;
     file->map_size = map_size;
+    kt_file_set_segment_pointers(file);
     return file;
 
 unmap_dat:
@@ -254,8 +279,6 @@ leave:
 int main(void) {
     int i;
     struct kt_file *file;
-    const char *str = "this is some data";
-    size_t len = strlen(str);
     int status = 0;
 
     file = kt_find_file("employee", 0, 30);
@@ -264,11 +287,33 @@ int main(void) {
         return -1;
     }
     printf("found data file: '%s'\n", file->fname);
+
     for (i = 0; i < 10; i++) {
-        fprintf(stderr, "%c", (file->dat + 40)[i]);
+        file->data.as_i64[i] = i;
+        file->type_info[i] = KT_INT;
     }
 
-    memcpy(file->dat + 10, str, len);
+    for (i = 0; i < 10; i++) {
+        switch (file->type_info[i]) {
+            case KT_INT:
+                fprintf(stderr, "%ld\n", file->data.as_i64[i]);
+                break;
+
+            case KT_FLOAT:
+                fprintf(stderr, "%f\n", file->data.as_f64[i]);
+                break;
+
+            case KT_STR: {
+                char buf[9] = {0};
+                memcpy(buf, file->data.as_str, 8);
+                fprintf(stderr, "%s\n", buf);
+                break;
+            }
+
+            case KT_NIL:
+                break;
+        }
+    }
 
     if (kt_file_free(file)) {
         const char *msg = "*** Very bad things have happened, "

@@ -1,6 +1,6 @@
 make clean || exit 1
 make debug EXTRA="-DKT_TEST_MMAP" || exit 1
-valgrind ./file
+valgrind --track-origins=yes ./file
 if [[ $? -eq 0 ]]; then
     printf "file: \033[92mSUCCESS\033[0m\n"
     exit 0
