@@ -30,7 +30,7 @@
 static int kt_file_set_segment_pointers(struct kt_file *file) {
     char *header = file->dat;
     char *ti = file->dat + 8;
-    char *d = file->dat + 29126;
+    char *d = file->dat + 29127;
 
     file->header = header;
     file->type_info = ti;
@@ -40,6 +40,7 @@ static int kt_file_set_segment_pointers(struct kt_file *file) {
 
 int kt_file_free(struct kt_file *file) {
     if (file) {
+        /*memset(file->dat, 0, file->map_size);*/
         if (msync(file->dat, file->map_size, MS_SYNC) == -1) {
             perror("failed to write to disk");
             return -1;
@@ -334,10 +335,7 @@ int main(void) {
     int status = 0;
 
     file = kt_find_file("employee", 0, 30);
-    if (!file) {
-        fprintf(stderr, "could not find data file\n");
-        return -1;
-    }
+    assert(file, "could not find data file\n");
     printf("found data file: '%s'\n", file->fname);
 
     if (sizeof(file->data) != 8) {
@@ -351,8 +349,9 @@ int main(void) {
 
     for (i = 0; i < 10; i++) {
         const char *fail_msg = "data integrity lost getting int";
-        kt_file_print_cell(file, i);
-        assert(kt_file_get_int(file, i) == (i | 0xa), fail_msg);
+        i64 num = kt_file_get_int(file, i);
+        assert(num == (i | 0xa), fail_msg);
+        printf("0x%02lx\n", num);
     }
 
     if (kt_file_free(file)) {
