@@ -9,6 +9,7 @@
 #include <string.h>
 #include <dirent.h>
 #include <errno.h>
+#include <stdbool.h>
 
 #include "file.h"
 #include "../globals.h"
@@ -275,6 +276,57 @@ leave:
     return file;
 }
 
+void kt_file_set_int(struct kt_file *file, int row, int64_t value) {
+    file->type_info[row] = KT_INT;
+    file->data.as_i64[row] = value;
+}
+
+void kt_file_set_float(struct kt_file *file, int row, double value) {
+    file->type_info[row] = KT_FLOAT;
+    file->data.as_f64[row] = value;
+}
+
+void kt_file_set_str(struct kt_file *file, int row, const char *value) {
+    UNUSED(value);
+    file->type_info[row] = KT_STR;
+    /* TODO: instead of setting string literal, make a file to store the
+     * string and use the data.as_str memory to point to that file */
+}
+
+i64 kt_file_get_int(struct kt_file *file, int row) {
+    return file->data.as_i64[row];
+}
+
+f64 kt_file_get_float(struct kt_file *file, int row) {
+    return file->data.as_f64[row];
+}
+
+void kt_file_print_cell(struct kt_file *file, int row) {
+    switch (file->type_info[row]) {
+        case KT_INT:
+            fprintf(stderr, "%ld\n", file->data.as_i64[row]);
+            break;
+
+        case KT_FLOAT:
+            fprintf(stderr, "%f\n", file->data.as_f64[row]);
+            break;
+
+        case KT_STR:
+            /* TODO: lookup file pointed to by file->data.as_u64[row] */
+            break;
+
+        case KT_NIL:
+            break;
+    }
+}
+
+void assert(bool expr, const char *msg) {
+    if (!expr) {
+        fprintf(stderr, "%s\n", msg);
+        exit(-1);
+    }
+}
+
 #ifdef KT_TEST_MMAP
 int main(void) {
     int i;
@@ -288,31 +340,19 @@ int main(void) {
     }
     printf("found data file: '%s'\n", file->fname);
 
-    for (i = 0; i < 10; i++) {
-        file->data.as_i64[i] = i;
-        file->type_info[i] = KT_INT;
+    if (sizeof(file->data) != 8) {
+        printf("sizeof(data) = %lu\n", sizeof(file->data));
+        return -1;
     }
 
     for (i = 0; i < 10; i++) {
-        switch (file->type_info[i]) {
-            case KT_INT:
-                fprintf(stderr, "%ld\n", file->data.as_i64[i]);
-                break;
+        kt_file_set_int(file, i, i | 0xa);
+    }
 
-            case KT_FLOAT:
-                fprintf(stderr, "%f\n", file->data.as_f64[i]);
-                break;
-
-            case KT_STR: {
-                char buf[9] = {0};
-                memcpy(buf, file->data.as_str, 8);
-                fprintf(stderr, "%s\n", buf);
-                break;
-            }
-
-            case KT_NIL:
-                break;
-        }
+    for (i = 0; i < 10; i++) {
+        const char *fail_msg = "data integrity lost getting int";
+        kt_file_print_cell(file, i);
+        assert(kt_file_get_int(file, i) == (i | 0xa), fail_msg);
     }
 
     if (kt_file_free(file)) {
