@@ -18,7 +18,7 @@ struct kt_file {
     char *dat;
     size_t map_size;
     char *fname;
-    int col;
+    size_t col;
     char *table;
     size_t row_begin;
     size_t row_end;
@@ -34,14 +34,14 @@ struct kt_file {
 
 int kt_file_free(struct kt_file *file);
 
-struct kt_file *kt_find_file(const char *table, int col, int row);
+struct kt_file *kt_find_file(const char *table, size_t col, size_t row);
 
 /* set memory segment with values */
-void kt_file_set_int(struct kt_file *file, int row, int64_t value);
-void kt_file_set_float(struct kt_file *file, int row, double value);
+void kt_file_set_int(struct kt_file *file, size_t row, int64_t value);
+void kt_file_set_float(struct kt_file *file, size_t row, double value);
 
 /* get value from memory segment */
-i64 kt_file_get_int(struct kt_file *file, int row);
-f64 kt_file_get_float(struct kt_file *file, int row);
+i64 kt_file_get_int(struct kt_file *file, size_t row);
+f64 kt_file_get_float(struct kt_file *file, size_t row);
 
 #endif /* KT_FILE_H */

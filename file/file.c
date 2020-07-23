@@ -14,7 +14,7 @@
 #include "file.h"
 #include "../globals.h"
 
-const size_t STEP_SIZE = 3640;
+const size_t STEP_SIZE = 258502;
 
 /**
  * The storage file consists of
@@ -32,7 +32,7 @@ const size_t STEP_SIZE = 3640;
 static int kt_file_set_segment_pointers(struct kt_file *file) {
     char *header = file->dat;
     char *ti = file->dat + 8;
-    char *d = file->dat + 29127;
+    char *d = file->dat + 29128;
 
     file->header = header;
     file->type_info = ti;
@@ -135,7 +135,7 @@ enum State {
     ROW_END
 };
 
-struct kt_file *kt_find_file(const char *table, int col, int row) {
+struct kt_file *kt_find_file(const char *table, size_t col, size_t row) {
     size_t lower_bound = (row / STEP_SIZE) * STEP_SIZE; /* floor division */
     size_t upper_bound = lower_bound + STEP_SIZE;
     size_t fname_sz = strlen(table) + strlen(storage_dir) + 100;
@@ -149,7 +149,7 @@ struct kt_file *kt_find_file(const char *table, int col, int row) {
     snprintf(
         fname,
         fname_sz,
-        "%s/%s-%d-%lu-%lu.db",
+        "%s/%s-%lu-%lu-%lu.db",
         storage_dir,
         table,
         col,
@@ -166,32 +166,32 @@ struct kt_file *kt_find_file(const char *table, int col, int row) {
     return file;
 }
 
-void kt_file_set_int(struct kt_file *file, int row, int64_t value) {
+void kt_file_set_int(struct kt_file *file, size_t row, int64_t value) {
     file->type_info[row] = KT_INT;
     file->data.as_i64[row] = value;
 }
 
-void kt_file_set_float(struct kt_file *file, int row, double value) {
+void kt_file_set_float(struct kt_file *file, size_t row, double value) {
     file->type_info[row] = KT_FLOAT;
     file->data.as_f64[row] = value;
 }
 
-void kt_file_set_str(struct kt_file *file, int row, const char *value) {
+void kt_file_set_str(struct kt_file *file, size_t row, const char *value) {
     UNUSED(value);
     file->type_info[row] = KT_STR;
     /* TODO: instead of setting string literal, make a file to store the
      * string and use the data.as_str memory to point to that file */
 }
 
-i64 kt_file_get_int(struct kt_file *file, int row) {
+i64 kt_file_get_int(struct kt_file *file, size_t row) {
     return file->data.as_i64[row];
 }
 
-f64 kt_file_get_float(struct kt_file *file, int row) {
+f64 kt_file_get_float(struct kt_file *file, size_t row) {
     return file->data.as_f64[row];
 }
 
-void kt_file_print_cell(struct kt_file *file, int row) {
+void kt_file_print_cell(struct kt_file *file, size_t row) {
     switch (file->type_info[row]) {
         case KT_INT:
             fprintf(stderr, "%ld\n", file->data.as_i64[row]);
@@ -231,6 +231,8 @@ int main(void) {
         printf("sizeof(data) = %lu\n", sizeof(file->data));
         return -1;
     }
+
+    kt_file_set_int(file, STEP_SIZE, 0xabcdef1deadbeef);
 
     for (i = 0; i < 10; i++) {
         kt_file_set_int(file, i, i | 0xa);
