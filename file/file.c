@@ -14,6 +14,8 @@
 #include "file.h"
 #include "../globals.h"
 
+const size_t STEP_SIZE = 3640;
+
 /**
  * The storage file consists of
  * 1) Header - contains enum of what kind of storage and version number
@@ -40,7 +42,6 @@ static int kt_file_set_segment_pointers(struct kt_file *file) {
 
 int kt_file_free(struct kt_file *file) {
     if (file) {
-        /*memset(file->dat, 0, file->map_size);*/
         if (msync(file->dat, file->map_size, MS_SYNC) == -1) {
             perror("failed to write to disk");
             return -1;
@@ -60,7 +61,7 @@ int kt_file_free(struct kt_file *file) {
     return 0;
 }
 
-int kt_open(const char *fname) {
+static int kt_open(const char *fname) {
     int fd;
     if ((fd = open(fname, O_RDWR|O_CREAT, 0600)) == -1) {
         char buf[200];
@@ -70,7 +71,7 @@ int kt_open(const char *fname) {
     return fd;
 }
 
-struct kt_file *kt_mmap(const char *fname) {
+static struct kt_file *kt_mmap(const char *fname) {
     char *dat;
     struct stat statbuf;
     size_t map_size;
@@ -134,146 +135,34 @@ enum State {
     ROW_END
 };
 
-static char kt_parse_data_filename(
-    const char *str,
-    char **tablename,
-    int *colname,
-    int *rowbegin,
-    int *rowend
-) {
-    int i;
-    int idx;
-    enum State state = TABLE_NAME;
-    *tablename = NULL;
-    for (i = 0; str[i] != '\0'; i++) {
-        if ((str[i] == '-') || (str[i] == '.')) {
-            switch (state) {
-                case TABLE_NAME:
-                    *tablename = strdup(str);
-                    (*tablename)[i] = '\0';
-                    state++;
-                    idx = ++i;
-                    break;
-
-                case COL_NAME:
-                    i++;
-                    *colname = strtol(str + idx, NULL, 10);
-                    if (errno == ERANGE) {
-                        goto fail;
-                    }
-                    state++;
-                    idx = i;
-                    break;
-
-                case ROW_BEGIN:
-                    i++;
-                    *rowbegin = strtol(str + idx, NULL, 10);
-                    if (errno == ERANGE) {
-                        goto fail;
-                    }
-                    state++;
-                    idx = i;
-                    break;
-
-                case ROW_END:
-                    *rowend = strtol(str + idx, NULL, 10);
-                    if (errno == ERANGE) {
-                        goto fail;
-                    }
-                    return 1;
-            }
-        }
-    }
-fail:
-    free(*tablename);
-    return 0;
-}
-
-char kt_check_file(
-    const char *target_table,
-    const char *file_table,
-    int target_col,
-    int file_col,
-    int target_row,
-    int row_begin,
-    int row_end
-) {
-    if (strcmp(target_table, file_table)) {
-        return 0;
-    }
-
-    if (target_col != file_col) {
-        return 0;
-    }
-
-    if ((target_row < row_begin) || (target_row > row_end)) {
-        return 0;
-    }
-
-    return 1;
-}
-
 struct kt_file *kt_find_file(const char *table, int col, int row) {
-    DIR *dir;
-    struct dirent *ent;
-    int rowbegin;
-    int rowend;
-    int colname;
-    char *tablename = NULL;
+    size_t lower_bound = (row / STEP_SIZE) * STEP_SIZE; /* floor division */
+    size_t upper_bound = lower_bound + STEP_SIZE;
+    size_t fname_sz = strlen(table) + strlen(storage_dir) + 100;
     struct kt_file *file = NULL;
-    char *fname = NULL;
+    char *fname = malloc(fname_sz);
 
-    if ((dir = opendir(storage_dir)) != NULL) {
-        while ((ent = readdir(dir)) != NULL) {
-            if (!kt_parse_data_filename(
-                    ent->d_name,
-                    &tablename,
-                    &colname,
-                    &rowbegin,
-                    &rowend
-                )
-            ) {
-                continue;
-            } else {
-                if (kt_check_file(
-                        table,
-                        tablename,
-                        col,
-                        colname,
-                        row,
-                        rowbegin,
-                        rowend)
-                ) {
-                    size_t dir_len = strlen(storage_dir);
-                    size_t dat_file_len = strlen(ent->d_name);
-                    fname = malloc(dir_len + dat_file_len + 2);
-                    if (!fname) {
-                        goto leave;
-                    }
-                    sprintf(fname, "%s/%s", storage_dir, ent->d_name);
-                    file = kt_mmap(fname);
-                    if (!file) {
-                        goto free_fname;
-                    }
-                    file->col = colname;
-                    file->table = tablename;
-                    file->row_begin = rowbegin;
-                    file->row_end = rowend;
-                    file->fname = fname;
-                    goto leave;
-                } else {
-                    free(tablename);
-                    tablename = NULL;
-                }
-            }
-        }
-    } else {
-        perror("failed to open storage directory");
+    if (!fname) {
+        return NULL;
     }
-free_fname:
-    free(fname);
-leave:
-    closedir(dir);
+
+    snprintf(
+        fname,
+        fname_sz,
+        "%s/%s-%d-%lu-%lu.db",
+        storage_dir,
+        table,
+        col,
+        lower_bound,
+        upper_bound
+    );
+
+    file = kt_mmap(fname);
+    file->col = col;
+    file->table = strdup(table);
+    file->row_begin = lower_bound;
+    file->row_end = upper_bound;
+    file->fname = fname;
     return file;
 }
 
@@ -321,7 +210,7 @@ void kt_file_print_cell(struct kt_file *file, int row) {
     }
 }
 
-void assert(bool expr, const char *msg) {
+static void assert(bool expr, const char *msg) {
     if (!expr) {
         fprintf(stderr, "%s\n", msg);
         exit(-1);

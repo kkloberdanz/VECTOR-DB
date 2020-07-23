@@ -34,10 +34,6 @@ struct kt_file {
 
 int kt_file_free(struct kt_file *file);
 
-int kt_open(const char *fname);
-
-struct kt_file *kt_mmap(const char *fname);
-
 struct kt_file *kt_find_file(const char *table, int col, int row);
 
 /* set memory segment with values */
