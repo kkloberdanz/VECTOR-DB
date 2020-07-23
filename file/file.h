@@ -24,6 +24,7 @@ struct kt_file {
     size_t row_end;
     char *header;
     char *type_info;
+    size_t num_cells;
     union {
         int64_t *as_i64;
         uint64_t *as_u64;

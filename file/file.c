@@ -117,6 +117,7 @@ static struct kt_file *kt_mmap(const char *fname) {
     file->fd = fd;
     file->dat = dat;
     file->map_size = map_size;
+    file->num_cells = 29120;
     kt_file_set_segment_pointers(file);
     return file;
 
@@ -219,7 +220,7 @@ static void assert(bool expr, const char *msg) {
 
 #ifdef KT_TEST_MMAP
 int main(void) {
-    int i;
+    i64 i;
     struct kt_file *file;
     int status = 0;
 
@@ -243,6 +244,17 @@ int main(void) {
         i64 num = kt_file_get_int(file, i);
         assert(num == (i | 0xa), fail_msg);
         printf("0x%02lx\n", num);
+    }
+
+    for (i = 0; i < file->num_cells; i++) {
+        kt_file_set_int(file, i, i);
+    }
+
+    for (i = 0; i < file->num_cells; i++) {
+        char fail_msg[200];
+        i64 num = kt_file_get_int(file, i);
+        sprintf(fail_msg, "data integrity lost getting int: %ld\n", i);
+        assert(num == i, fail_msg);
     }
 
     if (kt_file_free(file)) {
