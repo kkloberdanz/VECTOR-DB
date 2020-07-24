@@ -21,13 +21,16 @@ libvectordb-storage.a: file.o ktmath.o
 	ar rcs libvectordb-storage.a file.o ktmath.o
 
 libvectordb-storage.so: file.o ktmath.o
-	$(CC) -shared -o libvectordb-storage.so file.o ktmath.o
+	$(CC) -shared -o libvectordb-storage.so file.o ktmath.o $(CFLAGS) $(EXTRA) $(LDFLAGS)
 
-a.out: file.o ktmath.o
-	$(CC) -o a.out *.o $(CFLAGS) $(EXTRA) $(LDFLAGS)
+a.out: main.o libvectordb-storage.a
+	$(CC) -o a.out main.o libvectordb-storage.a $(CFLAGS) $(EXTRA) $(LDFLAGS)
+
+main.o: file.h ktmath.h
+	$(CC) -o main.o -c main.c $(CFLAGS) $(EXTRA)
 
 file.o: file.c file.h ktmath.h
-	$(CC) -o file.o -c file.c -DKT_TEST_MMAP $(CFLAGS) $(EXTRA)
+	$(CC) -o file.o -c file.c $(CFLAGS) $(EXTRA)
 
 ktmath.o: ktmath.c ktmath.h
 	$(CC) -o ktmath.o -c ktmath.c $(CFLAGS) $(EXTRA)
