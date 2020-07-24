@@ -11,17 +11,12 @@ int kt_mean(struct kt_file *file, size_t begin, size_t end, size_t dst) {
     double ratio = 1.0 / num_elements;
     size_t i;
     double mean = 0.0;
-    enum kt_cell_type first_type;
-    enum kt_cell_type type = 0;
-
-    first_type = file->type_info[begin];
+    enum kt_cell_type type = file->type_info[begin];
 
     for (i = begin; i < end; i++) {
-        type |= file->type_info[begin];
-    }
-
-    if (type != first_type) {
-        return -1;
+        if (type != file->type_info[i]) {
+            return -1;
+        }
     }
 
     /*
