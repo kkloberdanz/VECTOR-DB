@@ -32,7 +32,7 @@ const size_t STEP_SIZE = 233016;
 static int kt_file_set_segment_pointers(struct kt_file *file) {
     char *header = file->dat;
     char *ti = file->dat + 8;
-    char *d = file->dat + 233024;
+    char *d = file->dat + STEP_SIZE + 8;
 
     file->header = header;
     file->type_info = ti;
@@ -51,6 +51,9 @@ int kt_file_free(struct kt_file *file) {
             perror("failed to unmap memory");
             return -2;
         }
+
+        file->lock.l_type = F_UNLCK;
+        fcntl(file->fd, F_SETLKW, &file->lock);
 
         close(file->fd);
 
@@ -77,6 +80,7 @@ static struct kt_file *kt_mmap(const char *fname) {
     size_t map_size;
     int fd = kt_open(fname);
     struct kt_file *file;
+    struct flock lock;
 
     if (fd == -1) {
         goto fail;
@@ -114,10 +118,16 @@ static struct kt_file *kt_mmap(const char *fname) {
     if (!file) {
         goto unmap_dat;
     }
+
+    memset(&lock, 0, sizeof(lock));
+    lock.l_type = F_WRLCK;
+    fcntl(fd, F_SETLKW, &lock);
+
     file->fd = fd;
     file->dat = dat;
     file->map_size = map_size;
     file->num_cells = STEP_SIZE;
+    file->lock = lock;
     kt_file_set_segment_pointers(file);
     return file;
 

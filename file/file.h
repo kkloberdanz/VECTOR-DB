@@ -3,6 +3,8 @@
 
 #include <stdio.h>
 #include <stdint.h>
+#include <unistd.h>
+#include <fcntl.h>
 
 #include "../globals.h"
 
@@ -14,6 +16,7 @@ enum kt_cell_type {
 };
 
 struct kt_file {
+    struct flock lock;
     int fd;
     char *dat;
     size_t map_size;
