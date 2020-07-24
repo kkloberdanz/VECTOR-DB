@@ -89,6 +89,10 @@ static struct kt_file *kt_mmap(const char *fname) {
         goto fail;
     }
 
+    memset(&lock, 0, sizeof(lock));
+    lock.l_type = F_WRLCK;
+    fcntl(fd, F_SETLKW, &lock);
+
     fstat(fd, &statbuf);
     map_size = statbuf.st_size > KT_MAP_SIZE ? statbuf.st_size : KT_MAP_SIZE;
 
@@ -97,9 +101,12 @@ static struct kt_file *kt_mmap(const char *fname) {
         goto close_fd;
     }
 
-    if (write(fd, "", 1) == -1) {
-        perror("error writing last byte of the file");
-        goto close_fd;
+    if (statbuf.st_size < KT_MAP_SIZE) {
+        /* expand file to full size */
+        if (write(fd, "", 1) == -1) {
+            perror("error writing last byte of the file");
+            goto close_fd;
+        }
     }
 
     /* TODO: allocate huge pages */
@@ -122,10 +129,6 @@ static struct kt_file *kt_mmap(const char *fname) {
         goto unmap_dat;
     }
 
-    memset(&lock, 0, sizeof(lock));
-    lock.l_type = F_WRLCK;
-    fcntl(fd, F_SETLKW, &lock);
-
     file->fd = fd;
     file->dat = dat;
     file->map_size = map_size;
@@ -137,6 +140,8 @@ static struct kt_file *kt_mmap(const char *fname) {
 unmap_dat:
     munmap(dat, map_size);
 close_fd:
+    file->lock.l_type = F_UNLCK;
+    fcntl(fd, F_SETLKW, &lock);
     close(fd);
 fail:
     return NULL;
@@ -259,11 +264,11 @@ int main(void) {
         printf("0x%02lx\n", num);
     }
 
-    for (i = 0; i < file->num_cells; i++) {
+    for (i = 0; i < (i64)file->num_cells; i++) {
         kt_file_set_int(file, i, i);
     }
 
-    for (i = 0; i < file->num_cells; i++) {
+    for (i = 0; i < (i64)file->num_cells; i++) {
         char fail_msg[200];
         i64 num = kt_file_get_int(file, i);
         sprintf(fail_msg, "data integrity lost getting int: %ld\n", i);

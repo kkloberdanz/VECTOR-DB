@@ -1,12 +1,12 @@
 CC=cc
 STD=-std=gnu89
-OPT=-Ofast -march=native -mtune=native
+OPT=
 EXTRA=
 LDFLAGS=-lm
 CFLAGS=-Wall -Wextra -Wpedantic $(STD) $(OPT) -fPIC
 
 .PHONY: release
-release: OPT := -O3 -s
+release: OPT := -Ofast -march=native -mtune=native -s -flto
 release: all
 
 .PHONY: debug

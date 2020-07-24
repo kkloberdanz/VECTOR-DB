@@ -9,6 +9,7 @@
 #include "../globals.h"
 
 enum kt_cell_type {
+    KT_INVALID,
     KT_NIL,
     KT_INT,
     KT_FLOAT,
