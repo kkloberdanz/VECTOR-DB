@@ -2,6 +2,7 @@ CC=cc
 STD=-std=gnu89
 OPT=-Os
 EXTRA=
+LDFLAGS=-lm
 CFLAGS=-Wall -Wextra -Wpedantic $(STD) $(OPT) -fPIC
 
 .PHONY: release
@@ -13,10 +14,16 @@ debug: OPT := -O0 -ggdb3
 debug: all
 
 .PHONY: all
-all: file
+all: a.out
 
-file: file.c
-	$(CC) -o file file.c $(CFLAGS) $(EXTRA)
+a.out: file ktmath
+	$(CC) -o a.out *.o $(CFLAGS) $(EXTRA) $(LDFLAGS)
+
+file: file.c file.h ktmath.h
+	$(CC) -o file.o -c file.c $(CFLAGS) $(EXTRA)
+
+ktmath: ktmath.c ktmath.h
+	$(CC) -o ktmath.o -c ktmath.c $(CFLAGS) $(EXTRA)
 
 .PHONY: clean
 clean:

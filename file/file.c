@@ -12,9 +12,12 @@
 #include <stdbool.h>
 
 #include "file.h"
+#include "ktmath.h"
 #include "../globals.h"
 
 const size_t STEP_SIZE = 233016;
+
+const char *storage_dir = "worksheetsdb";
 
 /**
  * The storage file consists of
@@ -266,6 +269,9 @@ int main(void) {
         sprintf(fail_msg, "data integrity lost getting int: %ld\n", i);
         assert(num == i, fail_msg);
     }
+
+    kt_mean(file, 1, 100, 0);
+    printf("avg from 1 to 100 is: %ld\n", kt_file_get_int(file, 0));
 
     if (kt_file_free(file)) {
         const char *msg = "*** Very bad things have happened, "

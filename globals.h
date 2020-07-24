@@ -12,8 +12,6 @@ typedef uint32_t u32;
 typedef double f64;
 typedef float f32;
 
-const char *storage_dir = "worksheetsdb";
-
 enum kt_constants {
     KT_MAP_SIZE = (2 << 20)
 };
