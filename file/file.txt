@@ -1,10 +1,13 @@
 This document describes the format for the underlying data storage files
 
+            +-----------+
             | Header    | byte 0 - 7              : 8 bytes
+            +-----------+
             | Type Info | byte 8 - 233023         : 233016 bytes
             |           |
             |           |
             |           |
+            +-----------+
 2 MB        | Data      | byte 233024 - 2097152   : 1864128 bytes
 filesize    |           |
             |           |
@@ -18,6 +21,7 @@ filesize    |           |
             |           |
             |           |
             |           |
+            +-----------+
 
 2097152 total bytes (2MB)
 
