@@ -20,7 +20,7 @@ a.out: file ktmath
 	$(CC) -o a.out *.o $(CFLAGS) $(EXTRA) $(LDFLAGS)
 
 file: file.c file.h ktmath.h
-	$(CC) -o file.o -c file.c $(CFLAGS) $(EXTRA)
+	$(CC) -o file.o -c file.c -DKT_TEST_MMAP $(CFLAGS) $(EXTRA)
 
 ktmath: ktmath.c ktmath.h
 	$(CC) -o ktmath.o -c ktmath.c $(CFLAGS) $(EXTRA)

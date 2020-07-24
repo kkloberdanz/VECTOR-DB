@@ -270,8 +270,8 @@ int main(void) {
         assert(num == i, fail_msg);
     }
 
-    kt_mean(file, 1, 100, 0);
-    printf("avg from 1 to 100 is: %ld\n", kt_file_get_int(file, 0));
+    kt_mean(file, 1, 100000, 0);
+    printf("avg from 1 to 100000 is: %ld\n", kt_file_get_int(file, 0));
 
     if (kt_file_free(file)) {
         const char *msg = "*** Very bad things have happened, "
