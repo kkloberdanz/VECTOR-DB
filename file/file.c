@@ -275,8 +275,15 @@ int main(void) {
         assert(num == i, fail_msg);
     }
 
-    kt_mean(file, 1, 100000, 0);
-    printf("avg from 1 to 100000 is: %ld\n", kt_file_get_int(file, 0));
+    kt_mean(file, 1, 200001, 0);
+    printf("avg from 1 to 200001 is: %ld\n", kt_file_get_int(file, 0));
+
+    for (i = 0; i < (i64)file->num_cells; i++) {
+        kt_file_set_float(file, i, (double)i);
+    }
+
+    kt_mean(file, 1, 200001, 0);
+    printf("avg from 1.0 to 20000.0 is: %f\n", kt_file_get_float(file, 0));
 
     if (kt_file_free(file)) {
         const char *msg = "*** Very bad things have happened, "
