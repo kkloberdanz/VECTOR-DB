@@ -1,0 +1,25 @@
+This document describes the format for the underlying data storage files
+
+            | Header    | byte 0 - 7              : 8 bytes
+            | Type Info | byte 8 - 233023         : 233016 bytes
+            |           |
+            |           |
+            |           |
+2 MB        | Data      | byte 233024 - 2097152   : 1864128 bytes
+filesize    |           |
+            |           |
+            |           |
+            |           |
+            |           |
+            |           |
+            |           |
+            |           |
+            |           |
+            |           |
+            |           |
+            |           |
+
+2097152 total bytes (2MB)
+
+2097152 = 8x + x + 8
+x = 233016, which is called STEP_SIZE in the source code

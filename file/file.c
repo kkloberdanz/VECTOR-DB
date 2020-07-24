@@ -14,7 +14,7 @@
 #include "file.h"
 #include "../globals.h"
 
-const size_t STEP_SIZE = 258502;
+const size_t STEP_SIZE = 233016;
 
 /**
  * The storage file consists of
@@ -32,7 +32,7 @@ const size_t STEP_SIZE = 258502;
 static int kt_file_set_segment_pointers(struct kt_file *file) {
     char *header = file->dat;
     char *ti = file->dat + 8;
-    char *d = file->dat + 29128;
+    char *d = file->dat + 233024;
 
     file->header = header;
     file->type_info = ti;
@@ -117,7 +117,7 @@ static struct kt_file *kt_mmap(const char *fname) {
     file->fd = fd;
     file->dat = dat;
     file->map_size = map_size;
-    file->num_cells = 29120;
+    file->num_cells = STEP_SIZE;
     kt_file_set_segment_pointers(file);
     return file;
 
@@ -233,7 +233,7 @@ int main(void) {
         return -1;
     }
 
-    kt_file_set_int(file, STEP_SIZE, 0xabcdef1deadbeef);
+    kt_file_set_int(file, STEP_SIZE - 1, 0xabcdef1deadbeef);
 
     for (i = 0; i < 10; i++) {
         kt_file_set_int(file, i, i | 0xa);
