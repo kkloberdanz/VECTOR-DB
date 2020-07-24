@@ -4,7 +4,8 @@
 
 int kt_mean(struct kt_file *file, size_t begin, size_t end, size_t dst) {
     /*
-     * To avoid overflow, don't 
+     * To avoid overflow, don't accumulate everything into a single int,
+     * instead multiply each element by the ratio of the number of elements
      */
     double num_elements = end - begin;
     double ratio = 1.0 / num_elements;
