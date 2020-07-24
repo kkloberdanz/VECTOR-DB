@@ -221,7 +221,7 @@ void kt_file_print_cell(struct kt_file *file, size_t row) {
             break;
 
         case KT_STR:
-            /* TODO: lookup file pointed to by file->data.as_u64[row] */
+            /* TODO: lookup file pointed to by file->data.as_i64[row] */
             break;
 
         case KT_NIL:
