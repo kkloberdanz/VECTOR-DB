@@ -1,6 +1,7 @@
 #![feature(proc_macro_hygiene, decl_macro)]
 
-#[macro_use] extern crate rocket;
+#[macro_use]
+extern crate rocket;
 
 mod cstorage;
 
@@ -10,9 +11,7 @@ fn hello(name: String, age: u8) -> String {
 }
 
 fn print_hello(i: i32) -> i32 {
-    unsafe {
-        cstorage::kt_print_hello(i)
-    }
+    unsafe { cstorage::kt_print_hello(i) }
 }
 
 fn main() {
