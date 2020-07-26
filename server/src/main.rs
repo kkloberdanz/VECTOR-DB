@@ -17,8 +17,8 @@ fn get_cell(table: String, col: u64, row: u64) -> Result<String, String> {
     Ok(format!("{}", x))
 }
 
-#[post("/set/<table>/<col>/<row>/<value>")]
-fn set_cell(table: String, col: u64, row: u64, value: i64) -> Result<String, String> {
+#[post("/set/int/<table>/<col>/<row>/<value>")]
+fn set_int(table: String, col: u64, row: u64, value: i64) -> Result<String, String> {
     let file = vecstorage::find_file(table, col, row)?;
     let x = vecstorage::file_set_int(file, row, value);
     Ok("ok".to_string())
@@ -38,5 +38,5 @@ fn main() {
     let x = vecstorage::print_hello(144);
     println!("i got back: {}", x);
     lookup_file();
-    rocket::ignite().mount("/", routes![hello, get_cell, set_cell]).launch();
+    rocket::ignite().mount("/", routes![hello, get_cell, set_int]).launch();
 }
