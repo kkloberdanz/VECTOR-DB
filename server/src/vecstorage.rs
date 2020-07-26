@@ -14,7 +14,11 @@ pub fn file_free(file: *mut libc::c_void) -> i32 {
     unsafe { kt_file_free(file) }
 }
 
-pub fn find_file(table: String, col: u64, row: u64) -> Result<*mut libc::c_void, String> {
+pub fn find_file(
+    table: String,
+    col: u64,
+    row: u64,
+) -> Result<*mut libc::c_void, String> {
     let c_str = CString::new(table.into_bytes()).expect("CString::new failed");
     let file = unsafe { kt_find_file(c_str.as_ptr(), col, row) };
     if file.is_null() {
@@ -35,3 +39,8 @@ pub fn file_get_int(file: *mut libc::c_void, row: u64) -> i64 {
 
 //pub fn kt_file_set_float(file: *mut libc::c_void, row: u64, value: f64);
 //pub fn kt_file_get_float(file: *mut libc::c_void, row: u64);
+
+pub fn sum(file: *mut libc::c_void, begin: u64, end: u64, dst: u64) -> i32 {
+    let x = unsafe { kt_sum(file, begin, end, dst) };
+    x
+}

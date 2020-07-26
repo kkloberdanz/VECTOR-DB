@@ -14,29 +14,46 @@ fn hello(name: String, age: u8) -> String {
 fn get_cell(table: String, col: u64, row: u64) -> Result<String, String> {
     let file = vecstorage::find_file(table, col, row)?;
     let x = vecstorage::file_get_int(file, row);
+    vecstorage::file_free(file);
     Ok(format!("{}", x))
 }
 
 #[post("/set/int/<table>/<col>/<row>/<value>")]
-fn set_int(table: String, col: u64, row: u64, value: i64) -> Result<String, String> {
+fn set_int(
+    table: String,
+    col: u64,
+    row: u64,
+    value: i64,
+) -> Result<String, String> {
     let file = vecstorage::find_file(table, col, row)?;
-    let x = vecstorage::file_set_int(file, row, value);
+    vecstorage::file_set_int(file, row, value);
+    vecstorage::file_free(file);
     Ok("ok".to_string())
 }
 
-fn lookup_file() -> Result<i32, String> {
-    let file = vecstorage::find_file("employee".to_string(), 0, 30)?;
-    vecstorage::file_set_int(file, 100, 108743242);
-    let x = vecstorage::file_get_int(file, 100);
-    println!("read {} from file", x);
-    let ret = vecstorage::file_free(file);
-    println!("got status code: {} from closing file", ret);
-    Ok(ret)
+#[post("/sum/<table>/<col>/<row_begin>/<row_end>/<dst>")]
+fn sum(
+    table: String,
+    col: u64,
+    row_begin: u64,
+    row_end: u64,
+    dst: u64,
+) -> Result<String, String> {
+    // TODO: handle operations over multiple files
+    let file = vecstorage::find_file(table, col, row_begin)?;
+    let x = vecstorage::sum(file, row_begin, row_end, dst);
+    vecstorage::file_free(file);
+    if x > 0 {
+        Ok("ok".to_string())
+    } else {
+        Err("summing over invalid types".to_string())
+    }
 }
 
 fn main() {
     let x = vecstorage::print_hello(144);
     println!("i got back: {}", x);
-    lookup_file();
-    rocket::ignite().mount("/", routes![hello, get_cell, set_int]).launch();
+    rocket::ignite()
+        .mount("/", routes![hello, get_cell, set_int, sum])
+        .launch();
 }
