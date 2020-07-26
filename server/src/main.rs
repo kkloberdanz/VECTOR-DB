@@ -12,6 +12,9 @@ fn hello(name: String, age: u8) -> String {
 
 fn lookup_file() -> Result<i32, String> {
     let file = vecstorage::find_file("employee".to_string(), 0, 30)?;
+    vecstorage::file_set_int(file, 100, 108743242);
+    let x = vecstorage::file_get_int(file, 100);
+    println!("read {} from file", x);
     let ret = vecstorage::file_free(file);
     println!("got status code: {} from closing file", ret);
     Ok(ret)

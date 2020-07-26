@@ -51,6 +51,4 @@ void kt_file_set_float(struct kt_file *file, size_t row, double value);
 i64 kt_file_get_int(struct kt_file *file, size_t row);
 f64 kt_file_get_float(struct kt_file *file, size_t row);
 
-int kt_file_is_null(struct kt_file *file);
-
 #endif /* KT_FILE_H */

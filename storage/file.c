@@ -217,10 +217,6 @@ int kt_print_hello(int i) {
     return 42;
 }
 
-int kt_file_is_null(struct kt_file *file) {
-    return file == NULL;
-}
-
 void kt_file_print_cell(struct kt_file *file, size_t row) {
     switch (file->type_info[row]) {
         case KT_INT:
