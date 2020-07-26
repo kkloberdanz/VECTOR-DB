@@ -8,6 +8,8 @@
 
 #include "../globals.h"
 
+int kt_print_hello(int i);
+
 enum kt_cell_type {
     KT_INVALID,
     KT_NIL,

@@ -9,6 +9,9 @@ build = "build.rs"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+libc = "0.2"
 rocket = "0.4.5"
+
+[build-dependencies]
 cc = { version = "1.0.58", features = ["parallel"] }
 pkg-config = "0.3.18"

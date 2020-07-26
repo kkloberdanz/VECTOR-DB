@@ -748,6 +748,7 @@ name = "vector-db-server"
 version = "0.1.0"
 dependencies = [
  "cc",
+ "libc",
  "pkg-config",
  "rocket",
 ]
