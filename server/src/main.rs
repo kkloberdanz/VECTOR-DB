@@ -2,17 +2,21 @@
 
 #[macro_use] extern crate rocket;
 
-mod lib;
+mod cstorage;
 
 #[get("/hello/<name>/<age>")]
 fn hello(name: String, age: u8) -> String {
     format!("Hello, {} year old named {}!", age, name)
 }
 
-fn main() {
+fn print_hello(i: i32) -> i32 {
     unsafe {
-        let x = lib::kt_print_hello(155);
-        println!("i got back: {}", x);
+        cstorage::kt_print_hello(i)
     }
+}
+
+fn main() {
+    let x = print_hello(144);
+    println!("i got back: {}", x);
     rocket::ignite().mount("/", routes![hello]).launch();
 }
