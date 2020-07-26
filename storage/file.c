@@ -68,7 +68,7 @@ int kt_file_free(struct kt_file *file) {
 }
 
 static int kt_open(const char *fname) {
-    int fd;
+    int fd = -1;
     if ((fd = open(fname, O_RDWR|O_CREAT, 0600)) == -1) {
         char buf[200];
         snprintf(buf, 200, "kt_open failed to open file: '%s'", fname);
@@ -177,11 +177,13 @@ struct kt_file *kt_find_file(const char *table, size_t col, size_t row) {
     );
 
     file = kt_mmap(fname);
-    file->col = col;
-    file->table = strdup(table);
-    file->row_begin = lower_bound;
-    file->row_end = upper_bound;
-    file->fname = fname;
+    if (file) {
+        file->col = col;
+        file->table = strdup(table);
+        file->row_begin = lower_bound;
+        file->row_end = upper_bound;
+        file->fname = fname;
+    }
     return file;
 }
 
@@ -213,6 +215,10 @@ f64 kt_file_get_float(struct kt_file *file, size_t row) {
 int kt_print_hello(int i) {
     printf("hello, your number is: %d\n", i);
     return 42;
+}
+
+int kt_file_is_null(struct kt_file *file) {
+    return file == NULL;
 }
 
 void kt_file_print_cell(struct kt_file *file, size_t row) {

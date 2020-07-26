@@ -10,8 +10,16 @@ fn hello(name: String, age: u8) -> String {
     format!("Hello, {} year old named {}!", age, name)
 }
 
+fn lookup_file() -> Result<i32, String> {
+    let file = vecstorage::find_file("employee".to_string(), 0, 30)?;
+    let ret = vecstorage::file_free(file);
+    println!("got status code: {} from closing file", ret);
+    Ok(ret)
+}
+
 fn main() {
     let x = vecstorage::print_hello(144);
     println!("i got back: {}", x);
+    lookup_file();
     rocket::ignite().mount("/", routes![hello]).launch();
 }
