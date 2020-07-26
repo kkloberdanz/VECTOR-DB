@@ -210,6 +210,11 @@ f64 kt_file_get_float(struct kt_file *file, size_t row) {
     return file->data.as_f64[row];
 }
 
+int kt_print_hello(int i) {
+    printf("hello, your number is: %d\n", i);
+    return 42;
+}
+
 void kt_file_print_cell(struct kt_file *file, size_t row) {
     switch (file->type_info[row]) {
         case KT_INT:

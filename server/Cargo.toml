@@ -1,5 +1,5 @@
 [package]
-name = "network"
+name = "vector-db-server"
 version = "0.1.0"
 authors = ["Kyle Kloberdanz <kyle.g.kloberdanz@gmail.com>"]
 edition = "2018"

@@ -404,15 +404,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "network"
-version = "0.1.0"
-dependencies = [
- "cc",
- "pkg-config",
- "rocket",
-]
-
-[[package]]
 name = "num_cpus"
 version = "1.13.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -750,6 +741,15 @@ dependencies = [
  "idna",
  "matches",
  "percent-encoding 1.0.1",
+]
+
+[[package]]
+name = "vector-db-server"
+version = "0.1.0"
+dependencies = [
+ "cc",
+ "pkg-config",
+ "rocket",
 ]
 
 [[package]]
