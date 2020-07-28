@@ -140,7 +140,7 @@ static struct kt_file *kt_mmap(const char *fname) {
 unmap_dat:
     munmap(dat, map_size);
 close_fd:
-    file->lock.l_type = F_UNLCK;
+    lock.l_type = F_UNLCK;
     fcntl(fd, F_SETLKW, &lock);
     close(fd);
 fail:
