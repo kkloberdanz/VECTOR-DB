@@ -1,6 +1,10 @@
 .PHONY: release
 release: server/target/release/vector-db-server
 
+.PHONY: run
+run: release
+	cd server && cargo run --release
+
 .PHONY: debug
 debug: server/target/debug/vector-db-server
 
