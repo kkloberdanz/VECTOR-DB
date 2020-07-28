@@ -5,6 +5,10 @@ release: server/target/release/vector-db-server
 run: release
 	cd server && cargo run --release
 
+.PHONY: fmt
+fmt:
+	cd server && cargo fmt
+
 .PHONY: debug
 debug: server/target/debug/vector-db-server
 

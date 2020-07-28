@@ -5,17 +5,28 @@ extern crate rocket;
 
 mod vecstorage;
 
+use rocket::response::status::NotFound;
+
 #[get("/hello/<name>/<age>")]
 fn hello(name: String, age: u8) -> String {
     format!("Hello, {} year old named {}!", age, name)
 }
 
 #[get("/get/int/<table>/<col>/<row>")]
-fn get_int(table: String, col: u64, row: u64) -> Result<String, String> {
-    let file = vecstorage::find_file(table, col, row)?;
-    let x = vecstorage::file_get_int(file, row);
-    vecstorage::file_free(file);
-    Ok(format!("{}", x))
+fn get_int(
+    table: String,
+    col: u64,
+    row: u64,
+) -> Result<String, NotFound<String>> {
+    let file = vecstorage::find_file(table, col, row);
+    match file {
+        Ok(f) => {
+            let x = vecstorage::file_get_int(f, row);
+            vecstorage::file_free(f);
+            Ok(format!("{}", x))
+        }
+        Err(e) => Err(NotFound(format!("{}", e))),
+    }
 }
 
 #[get("/get/float/<table>/<col>/<row>")]
