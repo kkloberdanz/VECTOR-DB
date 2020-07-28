@@ -6,6 +6,7 @@ extern crate rocket;
 mod vecstorage;
 
 use rocket::response::status::NotFound;
+use rocket::response::status::BadRequest;
 
 #[get("/hello/<name>/<age>")]
 fn hello(name: String, age: u8) -> String {
@@ -17,7 +18,7 @@ fn get_int(
     table: String,
     col: u64,
     row: u64,
-) -> Result<String, NotFound<String>> {
+) -> Result<String, BadRequest<String>> {
     let file = vecstorage::find_file(table, col, row);
     match file {
         Ok(f) => {
@@ -25,7 +26,7 @@ fn get_int(
             vecstorage::file_free(f);
             Ok(format!("{}", x))
         }
-        Err(e) => Err(NotFound(format!("{}", e))),
+        Err(e) => Err(BadRequest(Some(format!("{}", e)))),
     }
 }
 
