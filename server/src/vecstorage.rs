@@ -37,10 +37,31 @@ pub fn file_get_int(file: *mut libc::c_void, row: u64) -> i64 {
     x
 }
 
-//pub fn kt_file_set_float(file: *mut libc::c_void, row: u64, value: f64);
-//pub fn kt_file_get_float(file: *mut libc::c_void, row: u64);
+pub fn file_set_float(file: *mut libc::c_void, row: u64, value: f64) {
+    unsafe { kt_file_set_float(file, row, value) };
+}
+
+pub fn file_get_float(file: *mut libc::c_void, row: u64) -> f64 {
+    let x = unsafe { kt_file_get_float(file, row) };
+    x
+}
 
 pub fn sum(file: *mut libc::c_void, begin: u64, end: u64, dst: u64) -> i32 {
     let x = unsafe { kt_sum(file, begin, end, dst) };
+    x
+}
+
+pub fn mean(file: *mut libc::c_void, begin: u64, end: u64, dst: u64) -> i32 {
+    let x = unsafe { kt_mean(file, begin, end, dst) };
+    x
+}
+
+pub fn product(
+    file: *mut libc::c_void,
+    begin: u64,
+    end: u64,
+    dst: u64,
+) -> i32 {
+    let x = unsafe { kt_product(file, begin, end, dst) };
     x
 }
