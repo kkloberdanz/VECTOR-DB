@@ -1,9 +1,9 @@
 [package]
-name = "vector-db-server"
+name = "vectrix"
 version = "0.1.0"
 authors = ["Kyle Kloberdanz <kyle.g.kloberdanz@gmail.com>"]
 edition = "2018"
-links = "vectordb-storage"
+links = "vectrix"
 build = "build.rs"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
