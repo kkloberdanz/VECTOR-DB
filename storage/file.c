@@ -19,6 +19,8 @@ const size_t STEP_SIZE = 233016;
 
 const char *storage_dir = "worksheetsdb";
 
+char *strdup(const char *);
+
 /**
  * The storage file consists of
  * 1) Header - contains enum of what kind of storage and version number

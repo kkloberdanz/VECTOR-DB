@@ -74,9 +74,9 @@ fn sum(
 ) -> Result<String, String> {
     // TODO: handle operations over multiple files
     let file = vecstorage::find_file(table, col, row_begin)?;
-    let x = vecstorage::sum(file, row_begin, row_end, dst);
+    let ret = vecstorage::sum(file, row_begin, row_end, dst);
     vecstorage::file_free(file);
-    if x > 0 {
+    if ret >= 0 {
         Ok("ok".to_string())
     } else {
         Err("summing over invalid types".to_string())
@@ -95,7 +95,7 @@ fn mean(
     let file = vecstorage::find_file(table, col, row_begin)?;
     let x = vecstorage::mean(file, row_begin, row_end, dst);
     vecstorage::file_free(file);
-    if x > 0 {
+    if x >= 0 {
         Ok("ok".to_string())
     } else {
         Err("summing over invalid types".to_string())
@@ -114,7 +114,7 @@ fn product(
     let file = vecstorage::find_file(table, col, row_begin)?;
     let x = vecstorage::product(file, row_begin, row_end, dst);
     vecstorage::file_free(file);
-    if x > 0 {
+    if x >= 0 {
         Ok("ok".to_string())
     } else {
         Err("summing over invalid types".to_string())

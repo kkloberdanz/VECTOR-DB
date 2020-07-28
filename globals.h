@@ -5,6 +5,9 @@
 
 #define UNUSED(x) (void)(x)
 
+#define likely(x)       __builtin_expect((x),1)
+#define unlikely(x)     __builtin_expect((x),0)
+
 typedef uint64_t u64;
 typedef int64_t i64;
 typedef int32_t i32;

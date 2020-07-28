@@ -1,6 +1,7 @@
+#include <math.h>
+
 #include "file.h"
 #include "ktmath.h"
-#include "math.h"
 
 enum kt_cell_type kt_get_type_range(
     struct kt_file *file,
@@ -10,7 +11,7 @@ enum kt_cell_type kt_get_type_range(
     size_t i;
     enum kt_cell_type type = file->type_info[begin];
     for (i = begin; i < end; i++) {
-        if (type != (enum kt_cell_type)file->type_info[i]) {
+        if (unlikely(type != (enum kt_cell_type)file->type_info[i])) {
             return KT_INVALID;
         }
     }
@@ -81,7 +82,6 @@ int kt_sum(struct kt_file *file, size_t begin, size_t end, size_t dst) {
         case KT_INVALID:
             return -2;
     }
-
     return 0;
 }
 
@@ -93,6 +93,9 @@ int kt_product(struct kt_file *file, size_t begin, size_t end, size_t dst) {
         case KT_INT:
             for (i = begin; i < end; i++) {
                 acc *= file->data.as_i64[i];
+                if (unlikely(!acc)) {
+                    break;
+                }
             }
             kt_file_set_int(file, dst, acc);
             break;
@@ -100,6 +103,9 @@ int kt_product(struct kt_file *file, size_t begin, size_t end, size_t dst) {
         case KT_FLOAT:
             for (i = begin; i < end; i++) {
                 acc *= file->data.as_f64[i];
+                if (unlikely(!acc)) {
+                    break;
+                }
             }
             kt_file_set_float(file, dst, acc);
             break;
