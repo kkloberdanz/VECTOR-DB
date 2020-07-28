@@ -1,5 +1,5 @@
 .PHONY: release
-release: server/target/release/vector-db-server
+release: server/target/release/vectrix
 
 .PHONY: run
 run: release
@@ -10,15 +10,15 @@ fmt:
 	cd server && cargo fmt
 
 .PHONY: debug
-debug: server/target/debug/vector-db-server
+debug: server/target/debug/vectrix
 
-server/target/release/vector-db-server: server/src/*.rs storage/libvectordb-storage.a
+server/target/release/vectrix: server/src/*.rs storage/libvectrix-storage.a
 	cd server && cargo build --release
 
-server/target/debug/vector-db-server: server/src/*.rs storage/libvectordb-storage.a
+server/target/debug/vectrix: server/src/*.rs storage/libvectrix-storage.a
 	cd server && cargo build
 
-storage/libvectordb-storage.a: storage/*.c storage/*.h
+storage/libvectrix-storage.a: storage/*.c storage/*.h
 	cd storage && $(MAKE) -j`nproc`
 
 .PHONY: clean
