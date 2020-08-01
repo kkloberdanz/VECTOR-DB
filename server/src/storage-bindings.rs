@@ -2,7 +2,7 @@ extern crate libc;
 
 use std::os::raw::c_int;
 
-#[link(name = "vectordb-storage")]
+#[link(name = "vectrix-storage")]
 extern "C" {
     pub fn kt_print_hello(i: c_int) -> c_int;
     pub fn kt_file_free(file: *mut libc::c_void) -> c_int;
