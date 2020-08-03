@@ -156,11 +156,13 @@ enum State {
     ROW_END
 };
 
-struct kt_file *kt_find_file(const char *table, size_t col, size_t row) {
+/*
+ * get the name of the file that contains the table at the given row and col
+ */
+char *kt_file_get_fname(const char *table, size_t col, size_t row) {
     size_t lower_bound = (row / STEP_SIZE) * STEP_SIZE; /* floor division */
     size_t upper_bound = lower_bound + STEP_SIZE;
     size_t fname_sz = strlen(table) + strlen(storage_dir) + 100;
-    struct kt_file *file = NULL;
     char *fname = malloc(fname_sz);
 
     if (!fname) {
@@ -177,6 +179,19 @@ struct kt_file *kt_find_file(const char *table, size_t col, size_t row) {
         lower_bound,
         upper_bound
     );
+
+    return fname;
+}
+
+struct kt_file *kt_find_file(const char *table, size_t col, size_t row) {
+    size_t lower_bound = (row / STEP_SIZE) * STEP_SIZE; /* floor division */
+    size_t upper_bound = lower_bound + STEP_SIZE;
+    struct kt_file *file = NULL;
+    char *fname = kt_file_get_fname(table, col, row);
+
+    if (!fname) {
+        return NULL;
+    }
 
     file = kt_mmap(fname);
     if (file) {

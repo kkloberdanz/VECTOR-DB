@@ -15,4 +15,5 @@ extern "C" {
     pub fn kt_mean(file: *mut libc::c_void, begin: u64, end: u64, dst: u64) -> i32;
     pub fn kt_sum(file: *mut libc::c_void, begin: u64, end: u64, dst: u64) -> i32;
     pub fn kt_product(file: *mut libc::c_void, begin: u64, end: u64, dst: u64) -> i32;
+    pub fn kt_file_get_fname(table: *const c_char, col: u64, row: u64) -> *mut c_char;
 }

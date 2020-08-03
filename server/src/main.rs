@@ -3,14 +3,40 @@
 #[macro_use]
 extern crate rocket;
 
+#[macro_use]
+extern crate lazy_static;
+
+extern crate libc;
+
 mod vecstorage;
 
 use rocket::response::status::NotFound;
 use rocket::response::status::BadRequest;
+use std::collections::HashMap;
+use std::sync::{Arc, Mutex};
 
-#[get("/hello/<name>/<age>")]
-fn hello(name: String, age: u8) -> String {
-    format!("Hello, {} year old named {}!", age, name)
+lazy_static! {
+    static ref FILES: Arc<Mutex<HashMap<String, vecstorage::VecFile>>> =
+        Arc::new(Mutex::new(HashMap::new()));
+}
+
+fn get_file(table: &String, col: u64, row: u64) -> Result<vecstorage::VecFile, String> {
+    let file = vecstorage::find_file(table, col, row)?;
+    let fname = vecstorage::get_fname(table, col, row);
+    let mut files = FILES.lock().unwrap();
+    // TODO: wrap file in an Arc
+    match files.get(&fname) {
+        Some(my_file) => Ok(*my_file),
+        None => {
+            files.insert(fname, file);
+            Ok(file)
+        }
+    }
+}
+
+#[get("/hello")]
+fn hello() -> String {
+    format!("hello world!")
 }
 
 #[get("/get/int/<table>/<col>/<row>")]
@@ -19,11 +45,10 @@ fn get_int(
     col: u64,
     row: u64,
 ) -> Result<String, BadRequest<String>> {
-    let file = vecstorage::find_file(table, col, row);
+    let file = get_file(&table, col, row);
     match file {
         Ok(f) => {
-            let x = vecstorage::file_get_int(f, row);
-            vecstorage::file_free(f);
+            let x = vecstorage::file_get_int(&f, row);
             Ok(format!("{}", x))
         }
         Err(e) => Err(BadRequest(Some(format!("{}", e)))),
@@ -32,9 +57,8 @@ fn get_int(
 
 #[get("/get/float/<table>/<col>/<row>")]
 fn get_float(table: String, col: u64, row: u64) -> Result<String, String> {
-    let file = vecstorage::find_file(table, col, row)?;
-    let x = vecstorage::file_get_float(file, row);
-    vecstorage::file_free(file);
+    let file = get_file(&table, col, row)?;
+    let x = vecstorage::file_get_float(&file, row);
     Ok(format!("{}", x))
 }
 
@@ -45,9 +69,8 @@ fn set_int(
     row: u64,
     value: i64,
 ) -> Result<String, String> {
-    let file = vecstorage::find_file(table, col, row)?;
-    vecstorage::file_set_int(file, row, value);
-    vecstorage::file_free(file);
+    let file = get_file(&table, col, row)?;
+    vecstorage::file_set_int(&file, row, value);
     Ok("ok".to_string())
 }
 
@@ -58,9 +81,8 @@ fn set_float(
     row: u64,
     value: f64,
 ) -> Result<String, String> {
-    let file = vecstorage::find_file(table, col, row)?;
-    vecstorage::file_set_float(file, row, value);
-    vecstorage::file_free(file);
+    let file = get_file(&table, col, row)?;
+    vecstorage::file_set_float(&file, row, value);
     Ok("ok".to_string())
 }
 
@@ -73,9 +95,8 @@ fn sum(
     dst: u64,
 ) -> Result<String, String> {
     // TODO: handle operations over multiple files
-    let file = vecstorage::find_file(table, col, row_begin)?;
-    let ret = vecstorage::sum(file, row_begin, row_end, dst);
-    vecstorage::file_free(file);
+    let file = get_file(&table, col, row_begin)?;
+    let ret = vecstorage::sum(&file, row_begin, row_end, dst);
     if ret >= 0 {
         Ok("ok".to_string())
     } else {
@@ -92,9 +113,8 @@ fn mean(
     dst: u64,
 ) -> Result<String, String> {
     // TODO: handle operations over multiple files
-    let file = vecstorage::find_file(table, col, row_begin)?;
-    let x = vecstorage::mean(file, row_begin, row_end, dst);
-    vecstorage::file_free(file);
+    let file = get_file(&table, col, row_begin)?;
+    let x = vecstorage::mean(&file, row_begin, row_end, dst);
     if x >= 0 {
         Ok("ok".to_string())
     } else {
@@ -111,9 +131,8 @@ fn product(
     dst: u64,
 ) -> Result<String, String> {
     // TODO: handle operations over multiple files
-    let file = vecstorage::find_file(table, col, row_begin)?;
-    let x = vecstorage::product(file, row_begin, row_end, dst);
-    vecstorage::file_free(file);
+    let file = get_file(&table, col, row_begin)?;
+    let x = vecstorage::product(&file, row_begin, row_end, dst);
     if x >= 0 {
         Ok("ok".to_string())
     } else {
@@ -133,4 +152,9 @@ fn main() {
             ],
         )
         .launch();
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
 }

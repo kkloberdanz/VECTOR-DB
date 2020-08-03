@@ -13,4 +13,7 @@ for row in range(0, 200):
         raise Exception('bad status')
         
 requests.post(host + '/sum/asdf/0/0/200/1003');
-assert(requests.get(host + '/get/int/asdf/0/1003').content == b'19900')
+my_sum = requests.get(host + '/get/int/asdf/0/1003').content
+print('sum is:', my_sum)
+assert(my_sum == b'19900')
+print('Ok')
