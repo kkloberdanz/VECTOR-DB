@@ -10,24 +10,23 @@ extern crate libc;
 
 mod vecstorage;
 
-use rocket::response::status::NotFound;
 use rocket::response::status::BadRequest;
 use std::collections::HashMap;
 use std::sync::{Arc, Mutex};
+use std::process;
 
 lazy_static! {
-    static ref FILES: Arc<Mutex<HashMap<String, vecstorage::VecFile>>> =
-        Arc::new(Mutex::new(HashMap::new()));
+    static ref FILES: Mutex<HashMap<String, vecstorage::VecFile>> =
+        Mutex::new(HashMap::new());
 }
 
 fn get_file(table: &String, col: u64, row: u64) -> Result<vecstorage::VecFile, String> {
-    let file = vecstorage::find_file(table, col, row)?;
     let fname = vecstorage::get_fname(table, col, row);
     let mut files = FILES.lock().unwrap();
-    // TODO: wrap file in an Arc
     match files.get(&fname) {
         Some(my_file) => Ok(*my_file),
         None => {
+            let file = vecstorage::find_file(table, col, row)?;
             files.insert(fname, file);
             Ok(file)
         }
@@ -140,9 +139,28 @@ fn product(
     }
 }
 
+fn sigint_handler() {
+    let files = FILES.lock().unwrap();
+    for key in files.keys() {
+        match files.get(key) {
+            Some(file) => {
+                vecstorage::file_free(*file);
+            },
+            None => ()
+        };
+    }
+    process::exit(0);
+}
+
 fn main() {
     let x = vecstorage::print_hello(144);
     println!("i got back: {}", x);
+
+    ctrlc::set_handler(move || {
+        sigint_handler()
+    })
+    .expect("Error setting Ctrl-C handler");
+
     rocket::ignite()
         .mount(
             "/",

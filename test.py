@@ -1,19 +1,25 @@
 #!/usr/bin/env python3
 
 import requests
+from multiprocessing.pool import Pool as P
 
 host = 'http://localhost:8000' 
 path = '/set/int/asdf/0/{row}/{value}'
 
-for row in range(0, 200):
-    print('row = ', row)
+MAX = 10000
+
+def insert_num(row):
+    print('row =', row)
     route = host + path.format(row=row, value=row)
     resp = requests.post(route)
     if resp.status_code != 200:
         raise Exception('bad status')
+
+with P(10) as workers:
+    list(workers.map(insert_num, range(0, MAX)))
         
-requests.post(host + '/sum/asdf/0/0/200/1003');
-my_sum = requests.get(host + '/get/int/asdf/0/1003').content
+requests.post(host + f'/sum/asdf/0/0/{MAX}/{MAX + 1}');
+my_sum = int(requests.get(host + f'/get/int/asdf/0/{MAX + 1}').content)
 print('sum is:', my_sum)
-assert(my_sum == b'19900')
+assert(my_sum == sum(range(MAX)))
 print('Ok')
