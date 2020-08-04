@@ -2,6 +2,7 @@
 
 import requests
 from multiprocessing.pool import Pool as P
+import multiprocessing
 
 host = 'http://localhost:8000' 
 path = '/set/int/asdf/0/{row}/{value}'
@@ -9,13 +10,12 @@ path = '/set/int/asdf/0/{row}/{value}'
 MAX = 10000
 
 def insert_num(row):
-    print('row =', row)
     route = host + path.format(row=row, value=row)
     resp = requests.post(route)
     if resp.status_code != 200:
         raise Exception('bad status')
 
-with P(10) as workers:
+with P(multiprocessing.cpu_count()) as workers:
     list(workers.map(insert_num, range(0, MAX)))
         
 requests.post(host + f'/sum/asdf/0/0/{MAX}/{MAX + 1}');
