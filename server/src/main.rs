@@ -165,7 +165,7 @@ fn main() {
     panic::set_hook(Box::new(|_| {
         // in case of panic, ensure that the cache is written to disk
         cleanup_cache();
-        eprintln!("panic, but was able to cleanup cache first");
+        eprintln!("panic, but was able to write cache to disk");
         process::exit(-1);
     }));
 
