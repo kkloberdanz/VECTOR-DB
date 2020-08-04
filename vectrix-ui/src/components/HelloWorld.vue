@@ -7,26 +7,14 @@
         <th>Age</th>
       </tr>
       <tr>
-        <td>Jill</td>
-        <td>Smith</td>
-        <td>50</td>
+        <td contenteditable="true">Jill</td>
+        <td contenteditable="true">Smith</td>
+        <td contenteditable="true">50</td>
       </tr>
       <tr>
-        <td>Eve</td>
-        <td>Jackson</td>
-        <td>94</td>
-      </tr>
-    </table>
-
-    <table style="width:100%">
-      <tr>
-        <th>Name</th>
-        <th colspan="2">Telephone</th>
-      </tr>
-      <tr>
-        <td>Bill Gates</td>
-        <td>55577854</td>
-        <td>55577855</td>
+        <td contenteditable="true">Eve</td>
+        <td contenteditable="true">Jackson</td>
+        <td contenteditable="true">94</td>
       </tr>
     </table>
 
@@ -36,9 +24,21 @@
         <th colspan="2">Telephone</th>
       </tr>
       <tr>
-        <td>Bill Gates</td>
-        <td>55577854</td>
-        <td>55577855</td>
+        <td contenteditable="true">Bill Gates</td>
+        <td contenteditable="true">55577854</td>
+        <td contenteditable="true">55577855</td>
+      </tr>
+    </table>
+
+    <table style="width:100%">
+      <tr>
+        <th>Name</th>
+        <th colspan="2">Telephone</th>
+      </tr>
+      <tr>
+        <td contenteditable="true">Bill Gates</td>
+        <td contenteditable="true">55577854</td>
+        <td contenteditable="true">55577855</td>
       </tr>
     </table>
 
@@ -49,12 +49,12 @@
         <th>Savings</th>
       </tr>
       <tr>
-        <td>January</td>
-        <td>$100</td>
+        <td contenteditable="true">January</td>
+        <td contenteditable="true">$100</td>
       </tr>
       <tr>
-        <td>February</td>
-        <td>$50</td>
+        <td contenteditable="true">February</td>
+        <td contenteditable="true">$50</td>
       </tr>
     </table>
 
@@ -65,9 +65,9 @@
         <th>Age</th>
       </tr>
       <tr>
-        <td>Eve</td>
-        <td>Jackson</td>
-        <td>94</td>
+        <td contenteditable="true">Eve</td>
+        <td contenteditable="true">Jackson</td>
+        <td contenteditable="true">94</td>
       </tr>
     </table>
   </div>
