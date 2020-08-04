@@ -2,15 +2,15 @@
 #![allow(non_camel_case_types)]
 #![allow(non_snake_case)]
 
-use std::ffi::CString;
 use std::ffi::CStr;
+use std::ffi::CString;
 
 include!("./storage-bindings.rs");
 
 // TODO: implement drop and share Arc pointers for this object instead
 #[derive(Clone, Copy)]
 pub struct VecFile {
-    ptr: *mut libc::c_void
+    ptr: *mut libc::c_void,
 }
 
 unsafe impl Send for VecFile {}
@@ -28,18 +28,20 @@ pub fn find_file(
     col: u64,
     row: u64,
 ) -> Result<VecFile, String> {
-    let c_str = CString::new(String::from(table).into_bytes()).expect("CString::new failed");
+    let c_str = CString::new(String::from(table).into_bytes())
+        .expect("CString::new failed");
     let cfile = unsafe { kt_find_file(c_str.as_ptr(), col, row) };
     if cfile.is_null() {
         Err("failed to open file".to_string())
     } else {
-        let file = VecFile{ptr: cfile};
+        let file = VecFile { ptr: cfile };
         Ok(file)
     }
 }
 
 pub fn get_fname(table: &String, col: u64, row: u64) -> String {
-    let c_str = CString::new(String::from(table).into_bytes()).expect("CString::new failed");
+    let c_str = CString::new(String::from(table).into_bytes())
+        .expect("CString::new failed");
     let fname_c_str = unsafe { kt_file_get_fname(c_str.as_ptr(), col, row) };
 
     if fname_c_str.is_null() {
@@ -47,9 +49,8 @@ pub fn get_fname(table: &String, col: u64, row: u64) -> String {
         panic!("failed to allocate string, out of memory");
     }
 
-    let fname_rust_str = unsafe {
-        CStr::from_ptr(fname_c_str).to_str().unwrap().to_owned()
-    };
+    let fname_rust_str =
+        unsafe { CStr::from_ptr(fname_c_str).to_str().unwrap().to_owned() };
 
     unsafe {
         libc::free(fname_c_str as *mut libc::c_void);
@@ -85,12 +86,7 @@ pub fn mean(file: &VecFile, begin: u64, end: u64, dst: u64) -> i32 {
     x
 }
 
-pub fn product(
-    file: &VecFile,
-    begin: u64,
-    end: u64,
-    dst: u64,
-) -> i32 {
+pub fn product(file: &VecFile, begin: u64, end: u64, dst: u64) -> i32 {
     let x = unsafe { kt_product(file.ptr, begin, end, dst) };
     x
 }

@@ -12,15 +12,19 @@ mod vecstorage;
 
 use rocket::response::status::BadRequest;
 use std::collections::HashMap;
-use std::sync::Mutex;
 use std::process;
+use std::sync::Mutex;
 
 lazy_static! {
     static ref FILES: Mutex<HashMap<String, vecstorage::VecFile>> =
         Mutex::new(HashMap::new());
 }
 
-fn get_file(table: &String, col: u64, row: u64) -> Result<vecstorage::VecFile, String> {
+fn get_file(
+    table: &String,
+    col: u64,
+    row: u64,
+) -> Result<vecstorage::VecFile, String> {
     let fname = vecstorage::get_fname(table, col, row);
     let mut files = FILES.lock().unwrap();
     match files.get(&fname) {
@@ -145,8 +149,8 @@ fn sigint_handler() {
         match files.get(key) {
             Some(file) => {
                 vecstorage::file_free(*file);
-            },
-            None => ()
+            }
+            None => (),
         };
     }
     process::exit(0);
@@ -156,10 +160,8 @@ fn main() {
     let x = vecstorage::print_hello(144);
     println!("i got back: {}", x);
 
-    ctrlc::set_handler(move || {
-        sigint_handler()
-    })
-    .expect("Error setting Ctrl-C handler");
+    ctrlc::set_handler(move || sigint_handler())
+        .expect("Error setting Ctrl-C handler");
 
     rocket::ignite()
         .mount(
