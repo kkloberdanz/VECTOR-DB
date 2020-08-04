@@ -10,7 +10,8 @@
 <script>
 import jexcel from "jexcel";
 import "jexcel/dist/jexcel.css";
-var data = [
+
+let data = [
   ["Jazz", "Honda", "2019-02-12", "", true, "$ 2.000,00", "#777700"],
   ["Civic", "Honda", "2018-07-11", "", true, "$ 4.000,01", "#007777"],
   ["", "", "", "", "", "", ""],
@@ -23,7 +24,8 @@ var data = [
   ["", "", "", "", "", "", ""],
   ["", "", "", "", "", "", ""],
 ];
-var options = {
+
+let options = {
   data: data,
   allowToolbar: true,
   columns: [
