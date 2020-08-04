@@ -146,13 +146,8 @@ fn product(
 
 fn cleanup_cache() {
     let mut files = FILES.lock().unwrap();
-    for key in files.keys() {
-        match files.get(key) {
-            Some(file) => {
-                vecstorage::file_free(*file);
-            }
-            None => (),
-        };
+    for (_, file) in files.iter() {
+        vecstorage::file_free(*file);
     }
     files.clear();
 }
