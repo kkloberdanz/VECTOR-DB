@@ -12,7 +12,7 @@ mod vecstorage;
 
 use rocket::response::status::BadRequest;
 use std::collections::HashMap;
-use std::sync::{Arc, Mutex};
+use std::sync::Mutex;
 use std::process;
 
 lazy_static! {

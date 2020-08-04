@@ -51,10 +51,9 @@ pub fn get_fname(table: &String, col: u64, row: u64) -> String {
         CStr::from_ptr(fname_c_str).to_str().unwrap().to_owned()
     };
 
-// TODO: fix this memory leak, why doesn't this compile?
-//    unsafe {
-//        libc::free(fname_c_str);
-//    }
+    unsafe {
+        libc::free(fname_c_str as *mut libc::c_void);
+    }
     fname_rust_str
 }
 

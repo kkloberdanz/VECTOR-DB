@@ -4,7 +4,7 @@ import requests
 from multiprocessing.pool import Pool as P
 import multiprocessing
 
-host = 'http://homeflix.local:8000'
+host = 'http://localhost:8000'
 path = '/set/float/asdf/0/{row}/{value}'
 
 MAX = 1000
