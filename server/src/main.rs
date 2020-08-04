@@ -12,9 +12,9 @@ mod vecstorage;
 
 use rocket::response::status::BadRequest;
 use std::collections::HashMap;
+use std::panic;
 use std::process;
 use std::sync::Mutex;
-use std::panic;
 
 lazy_static! {
     static ref FILES: Mutex<HashMap<String, vecstorage::VecFile>> =
