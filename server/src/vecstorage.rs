@@ -45,7 +45,6 @@ pub fn get_fname(table: &String, col: u64, row: u64) -> String {
     let fname_c_str = unsafe { kt_file_get_fname(c_str.as_ptr(), col, row) };
 
     if fname_c_str.is_null() {
-        // TODO: handle this gracefully
         panic!("failed to allocate string, out of memory");
     }
 

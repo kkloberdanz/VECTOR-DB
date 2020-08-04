@@ -14,6 +14,7 @@ use rocket::response::status::BadRequest;
 use std::collections::HashMap;
 use std::process;
 use std::sync::Mutex;
+use std::panic;
 
 lazy_static! {
     static ref FILES: Mutex<HashMap<String, vecstorage::VecFile>> =
@@ -143,8 +144,8 @@ fn product(
     }
 }
 
-fn sigint_handler() {
-    let files = FILES.lock().unwrap();
+fn cleanup_cache() {
+    let mut files = FILES.lock().unwrap();
     for key in files.keys() {
         match files.get(key) {
             Some(file) => {
@@ -153,15 +154,25 @@ fn sigint_handler() {
             None => (),
         };
     }
+    files.clear();
+}
+
+// in case of panic, be sure to free the cache
+fn sigint_handler() {
+    cleanup_cache();
     process::exit(0);
 }
 
 fn main() {
-    let x = vecstorage::print_hello(144);
-    println!("i got back: {}", x);
-
     ctrlc::set_handler(move || sigint_handler())
         .expect("Error setting Ctrl-C handler");
+
+    panic::set_hook(Box::new(|_| {
+        // in case of panic, ensure that the cache is written to disk
+        cleanup_cache();
+        eprintln!("panic, but was able to cleanup cache first");
+        process::exit(-1);
+    }));
 
     rocket::ignite()
         .mount(
@@ -172,6 +183,8 @@ fn main() {
             ],
         )
         .launch();
+
+    cleanup_cache();
 }
 
 #[cfg(test)]
