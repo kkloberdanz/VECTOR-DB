@@ -12,11 +12,22 @@ import jexcel from "jexcel";
 import "jexcel/dist/jexcel.css";
 import axios from "axios";
 
+let failed_updates = [];
+
 let changed = function (instance, cell, col, row, value) {
   console.log(`[${col}, ${row}] = ${value}`);
   axios
     .post(`http://localhost:8000/set/float/example/${col}/${row}/${value}`, {})
-    .then((response) => console.log(response));
+    .then((response) => console.log(response))
+    .catch((error) => {
+      console.log(error);
+      console.log("all failed_updates:", failed_updates);
+      failed_updates.push({
+        col: col,
+        row: row,
+        value: value,
+      });
+    });
 };
 
 let data = [
