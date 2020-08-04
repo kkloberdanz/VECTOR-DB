@@ -10,6 +10,14 @@
 <script>
 import jexcel from "jexcel";
 import "jexcel/dist/jexcel.css";
+import axios from "axios";
+
+let changed = function (instance, cell, col, row, value) {
+  console.log(`[${col}, ${row}] = ${value}`);
+  axios
+    .post(`http://localhost:8000/set/float/example/${col}/${row}/${value}`, {})
+    .then((response) => console.log(response));
+};
 
 let data = [
   ["", "", "", "", "", "", ""],
@@ -58,32 +66,80 @@ let data = [
 let options = {
   data: data,
   allowToolbar: true,
+  onchange: changed,
   columns: [
     {
-      type: "text",
       width: "120px",
     },
     {
-      type: "text",
       width: "120px",
     },
     {
-      type: "text",
       width: "120px",
     },
     {
-      type: "text",
       width: "120px",
     },
     {
-      type: "text",
       width: "120px",
     },
     {
-      type: "text",
       width: "120px",
     },
-    { type: "color", width: "100px", render: "square" },
+    {
+      width: "120px",
+    },
+    {
+      width: "120px",
+    },
+    {
+      width: "120px",
+    },
+    {
+      width: "120px",
+    },
+    {
+      width: "120px",
+    },
+    {
+      width: "120px",
+    },
+    {
+      width: "120px",
+    },
+    {
+      width: "120px",
+    },
+    {
+      width: "120px",
+    },
+    {
+      width: "120px",
+    },
+    {
+      width: "120px",
+    },
+    {
+      width: "120px",
+    },
+    {
+      width: "120px",
+    },
+    {
+      width: "120px",
+    },
+    {
+      width: "120px",
+    },
+    {
+      width: "120px",
+    },
+    {
+      width: "120px",
+    },
+    {
+      width: "120px",
+    },
   ],
 };
 
