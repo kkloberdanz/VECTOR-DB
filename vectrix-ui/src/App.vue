@@ -12,6 +12,7 @@ import jexcel from "jexcel";
 import "jexcel/dist/jexcel.css";
 import axios from "axios";
 
+let table = "example";
 let failed_updates = {};
 
 let is_number = (n) => {
@@ -22,9 +23,9 @@ let handle_change = (col, row, value) => {
   console.log(`[${col},${row}] = ${value}::${typeof value}`);
   const path =
     value === ""
-      ? `http://localhost:8000/clear/example/${col}/${row}`
+      ? `http://localhost:8000/clear/${table}/${col}/${row}`
       : is_number(value)
-      ? `http://localhost:8000/set/float/example/${col}/${row}/${value}`
+      ? `http://localhost:8000/set/float/${table}/${col}/${row}/${value}`
       : ""; /* TODO: how to add strings? */
 
   if (path !== "") {
@@ -74,7 +75,7 @@ let load = (instance) => {
   for (let col = 0; col < 20; col++) {
     for (let row = 0; row < 20; row++) {
       axios
-        .get(`http://localhost:8000/get/type/example/${col}/${row}`)
+        .get(`http://localhost:8000/get/type/${table}/${col}/${row}`)
         .then((response) => {
           const type = response.data;
           let url = null;
@@ -83,11 +84,11 @@ let load = (instance) => {
               break;
 
             case "Float":
-              url = `http://localhost:8000/get/float/example/${col}/${row}`;
+              url = `http://localhost:8000/get/float/${table}/${col}/${row}`;
               break;
 
             case "Int":
-              url = `http://localhost:8000/get/int/example/${col}/${row}`;
+              url = `http://localhost:8000/get/int/${table}/${col}/${row}`;
               break;
 
             default:
