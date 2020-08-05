@@ -110,6 +110,11 @@ let load = (spreadsheet, x, y) => {
           let url = null;
           switch (type) {
             case "Nil":
+              spreadsheet.setValue(
+                col_index_to_name(col) + (row + 1),
+                "",
+                true
+              );
               break;
 
             case "Float":
