@@ -85,7 +85,7 @@ fn clear_cell(
     row: u64,
 ) -> Result<String, String> {
     let file = get_file(&table, col, row)?;
-    vecstorage::file_set_invalid(&file, row);
+    vecstorage::file_set_nil(&file, row);
     Ok("ok".to_string())
 }
 

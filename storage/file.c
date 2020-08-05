@@ -204,8 +204,8 @@ struct kt_file *kt_find_file(const char *table, size_t col, size_t row) {
     return file;
 }
 
-void kt_file_set_invalid(struct kt_file *file, size_t row) {
-    file->type_info[row] = KT_INVALID;
+void kt_file_set_nil(struct kt_file *file, size_t row) {
+    file->type_info[row] = KT_NIL;
     file->data.as_i64[row] = 0;
 }
 

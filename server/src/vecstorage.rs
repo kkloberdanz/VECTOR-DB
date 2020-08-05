@@ -61,8 +61,8 @@ pub fn file_set_int(file: &VecFile, row: u64, value: i64) {
     unsafe { kt_file_set_int(file.ptr, row, value) };
 }
 
-pub fn file_set_invalid(file: &VecFile, row: u64) {
-    unsafe { kt_file_set_invalid(file.ptr, row) };
+pub fn file_set_nil(file: &VecFile, row: u64) {
+    unsafe { kt_file_set_nil(file.ptr, row) };
 }
 
 pub fn file_get_int(file: &VecFile, row: u64) -> i64 {

@@ -11,8 +11,8 @@
 int kt_print_hello(int i);
 
 enum kt_cell_type {
-    KT_INVALID,
     KT_NIL,
+    KT_INVALID,
     KT_INT,
     KT_FLOAT,
     KT_STR

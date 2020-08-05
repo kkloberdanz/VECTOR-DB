@@ -43,18 +43,50 @@ let handle_change = (col, row, value) => {
   }
 };
 
-let retry_updates = () => {
+let col_index_to_name = (column_index) => {
+  let dividend = column_index + 1;
+  let column_name = "";
+
+  while (dividend > 0) {
+    let modulo = (dividend - 1) % 26;
+    column_name = String.fromCharCode(65 + modulo) + column_name;
+    dividend = Math.floor((dividend - modulo) / 26);
+  }
+
+  return column_name;
+};
+
+function retry_updates() {
   Object.keys(failed_updates).map((key) => {
     const v = failed_updates[key];
     const [c, r] = key.split(",");
     console.log(`retrying: ${c} ${r} ${v}`);
     handle_change(c, r, v);
   });
-};
+}
 
 let changed = (instance, cell, col, row, value) => {
   handle_change(col, row, value);
-  retry_updates();
+};
+
+let load = (instance) => {
+  console.log(Object.keys(instance));
+  for (let col = 0; col < 20; col++) {
+    for (let row = 0; row < 20; row++) {
+      axios
+        .get(`http://localhost:8000/get/float/example/${col}/${row}`)
+        .then((response) => {
+          console.log(Object.keys(response));
+          console.log("data =", response.data);
+          instance.spreadsheet.setValue(
+            col_index_to_name(col) + (row + 1),
+            response.data,
+            true
+          );
+        })
+        .catch((err) => console.log(err));
+    }
+  }
 };
 
 let data = [];
@@ -67,6 +99,7 @@ let options = {
   tableOverflow: true,
   fullscreen: true,
   minDimensions: [48, 1000],
+  colWidths: [120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120],
   columns: [],
 };
 
@@ -76,9 +109,13 @@ export default {
     /* TODO: load data from DB on mount */
     let spreadsheet = jexcel(this.$el, options);
     Object.assign(this, { spreadsheet });
+    load(this);
     window.setInterval(() => {
       retry_updates();
-    }, 10000);
+      //this.spreadsheet.setValue("A1", "12345555", true);
+      //this.spreadsheet.setValue(col_index_to_name(0) + "0", "42", true);
+      //load(this);
+    }, 60000);
   },
 };
 </script>
