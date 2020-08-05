@@ -23,10 +23,10 @@ storage/libvectrix-storage.a: storage/*.c storage/*.h
 
 .PHONY: uibuild
 uibuild:
-	cd vectrix-ui && npm run build
+	cd ui && npm run build
 
 .PHONY: clean
 clean:
 	cd storage && $(MAKE) clean
 	cd server && cargo clean
-	cd vectrix-ui && rm -rf dist/
+	cd ui && rm -rf dist/
