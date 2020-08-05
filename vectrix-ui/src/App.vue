@@ -20,7 +20,6 @@ let is_number = (n) => {
 };
 
 let handle_change = (col, row, value) => {
-  console.log(`[${col},${row}] = ${value}::${typeof value}`);
   const path =
     value === ""
       ? `http://localhost:8000/clear/${table}/${col}/${row}`
@@ -32,9 +31,7 @@ let handle_change = (col, row, value) => {
     const key = `${col},${row}`;
     axios
       .post(path, {})
-      .then((response) => {
-        console.log(`successfully updated [${key}] = ${value}`);
-        console.log(response);
+      .then(() => {
         delete failed_updates[key];
       })
       .catch((error) => {
@@ -68,12 +65,20 @@ function retry_updates() {
 
 let changed = (instance, cell, col, row, value) => {
   handle_change(col, row, value);
+  retry_updates();
 };
 
-let load = (instance) => {
-  console.log(Object.keys(instance));
-  for (let col = 0; col < 20; col++) {
-    for (let row = 0; row < 20; row++) {
+/* eslint-disable no-unused-vars */
+let selectionActive = (instance, x1, y1, x2, y2, origin) => {
+  load(instance.jexcel, x1, y1);
+};
+/* eslint-enable no-unused-vars */
+
+let load = (spreadsheet, x, y) => {
+  const start_x = x - 10 > 0 ? x - 10 : 0;
+  const start_y = y - 10 > 0 ? y - 10 : 0;
+  for (let col = start_x; col < x + 10; col++) {
+    for (let row = start_y; row < y + 10; row++) {
       axios
         .get(`http://localhost:8000/get/type/${table}/${col}/${row}`)
         .then((response) => {
@@ -97,7 +102,7 @@ let load = (instance) => {
 
           if (url) {
             axios.get(url).then((rsp) => {
-              instance.spreadsheet.setValue(
+              spreadsheet.setValue(
                 col_index_to_name(col) + (row + 1),
                 rsp.data,
                 true
@@ -116,6 +121,7 @@ let options = {
   data: data,
   allowToolbar: true,
   onchange: changed,
+  onselection: selectionActive,
   lazyLoading: true,
   tableOverflow: true,
   fullscreen: true,
@@ -127,13 +133,11 @@ let options = {
 export default {
   name: "App",
   mounted: function () {
-    /* TODO: load data from DB on mount */
     let spreadsheet = jexcel(this.$el, options);
     Object.assign(this, { spreadsheet });
-    load(this);
+    load(spreadsheet, 0, 0);
     window.setInterval(() => {
       retry_updates();
-      load(this);
     }, 60000);
   },
 };
