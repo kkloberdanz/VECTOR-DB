@@ -14,20 +14,33 @@ import axios from "axios";
 
 let failed_updates = [];
 
-let changed = function (instance, cell, col, row, value) {
-  console.log(`[${col}, ${row}] = ${value}`);
-  axios
-    .post(`http://localhost:8000/set/float/example/${col}/${row}/${value}`, {})
-    .then((response) => console.log(response))
-    .catch((error) => {
-      console.log(error);
-      console.log("all failed_updates:", failed_updates);
-      failed_updates.push({
-        col: col,
-        row: row,
-        value: value,
+let is_number = (n) => {
+  return !isNaN(n);
+};
+
+let changed = (instance, cell, col, row, value) => {
+  console.log(`[${col}, ${row}] = ${value}::${typeof value}`);
+  const path =
+    value === ""
+      ? `http://localhost:8000/clear/example/${col}/${row}`
+      : is_number(value)
+      ? `http://localhost:8000/set/float/example/${col}/${row}/${value}`
+      : ""; /* TODO: how to add strings? */
+
+  if (path !== "") {
+    axios
+      .post(path, {})
+      .then((response) => console.log(response))
+      .catch((error) => {
+        console.log(error);
+        console.log("all failed_updates:", failed_updates);
+        failed_updates.push({
+          col: col,
+          row: row,
+          value: value,
+        });
       });
-    });
+  }
 };
 
 let data = [

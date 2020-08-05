@@ -204,6 +204,11 @@ struct kt_file *kt_find_file(const char *table, size_t col, size_t row) {
     return file;
 }
 
+void kt_file_set_invalid(struct kt_file *file, size_t row) {
+    file->type_info[row] = KT_INVALID;
+    file->data.as_i64[row] = 0;
+}
+
 void kt_file_set_int(struct kt_file *file, size_t row, int64_t value) {
     file->type_info[row] = KT_INT;
     file->data.as_i64[row] = value;

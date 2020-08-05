@@ -78,6 +78,17 @@ fn set_int(
     Ok("ok".to_string())
 }
 
+#[post("/clear/<table>/<col>/<row>")]
+fn clear_cell(
+    table: String,
+    col: u64,
+    row: u64,
+) -> Result<String, String> {
+    let file = get_file(&table, col, row)?;
+    vecstorage::file_set_invalid(&file, row);
+    Ok("ok".to_string())
+}
+
 #[post("/set/float/<table>/<col>/<row>/<value>")]
 fn set_float(
     table: String,
@@ -174,7 +185,7 @@ fn main() {
             "/",
             routes![
                 hello, get_int, get_float, set_int, set_float, sum, mean,
-                product
+                product, clear_cell
             ],
         )
         .launch();
