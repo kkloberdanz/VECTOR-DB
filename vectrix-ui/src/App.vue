@@ -18,7 +18,7 @@ let is_number = (n) => {
   return !isNaN(n);
 };
 
-let changed = (instance, cell, col, row, value) => {
+let handle_change = (col, row, value) => {
   console.log(`[${col}, ${row}] = ${value}::${typeof value}`);
   const path =
     value === ""
@@ -41,6 +41,11 @@ let changed = (instance, cell, col, row, value) => {
         });
       });
   }
+};
+
+let changed = (instance, cell, col, row, value) => {
+  handle_change(col, row, value);
+  failed_updates.map((obj) => handle_change(obj.col, obj.row, obj.value));
 };
 
 let data = [
