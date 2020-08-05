@@ -59,6 +59,22 @@ fn get_int(
     }
 }
 
+#[get("/get/type/<table>/<col>/<row>")]
+fn get_cell_type(
+    table: String,
+    col: u64,
+    row: u64,
+) -> Result<String, BadRequest<String>> {
+    let file = get_file(&table, col, row);
+    match file {
+        Ok(f) => {
+            let typ = vecstorage::file_get_cell_type(&f, row);
+            Ok(format!("{:?}", typ))
+        }
+        Err(e) => Err(BadRequest(Some(format!("{}", e)))),
+    }
+}
+
 #[get("/get/float/<table>/<col>/<row>")]
 fn get_float(table: String, col: u64, row: u64) -> Result<String, String> {
     let file = get_file(&table, col, row)?;
@@ -184,7 +200,7 @@ fn main() {
         .mount(
             "/",
             routes![
-                hello, get_int, get_float, set_int, set_float, sum, mean,
+                hello, get_cell_type, get_int, get_float, set_int, set_float, sum, mean,
                 product, clear_cell
             ],
         )

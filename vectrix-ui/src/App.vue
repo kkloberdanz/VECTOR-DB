@@ -74,15 +74,35 @@ let load = (instance) => {
   for (let col = 0; col < 20; col++) {
     for (let row = 0; row < 20; row++) {
       axios
-        .get(`http://localhost:8000/get/float/example/${col}/${row}`)
+        .get(`http://localhost:8000/get/type/example/${col}/${row}`)
         .then((response) => {
-          console.log(Object.keys(response));
-          console.log("data =", response.data);
-          instance.spreadsheet.setValue(
-            col_index_to_name(col) + (row + 1),
-            response.data,
-            true
-          );
+          const type = response.data;
+          let url = null;
+          switch (type) {
+            case "Nil":
+              break;
+
+            case "Float":
+              url = `http://localhost:8000/get/float/example/${col}/${row}`;
+              break;
+
+            case "Int":
+              url = `http://localhost:8000/get/int/example/${col}/${row}`;
+              break;
+
+            default:
+              break;
+          }
+
+          if (url) {
+            axios.get(url).then((rsp) => {
+              instance.spreadsheet.setValue(
+                col_index_to_name(col) + (row + 1),
+                rsp.data,
+                true
+              );
+            });
+          }
         })
         .catch((err) => console.log(err));
     }
@@ -112,9 +132,7 @@ export default {
     load(this);
     window.setInterval(() => {
       retry_updates();
-      //this.spreadsheet.setValue("A1", "12345555", true);
-      //this.spreadsheet.setValue(col_index_to_name(0) + "0", "42", true);
-      //load(this);
+      load(this);
     }, 60000);
   },
 };

@@ -226,6 +226,10 @@ void kt_file_set_str(struct kt_file *file, size_t row, const char *value) {
      * string and use the data.as_str memory to point to that file */
 }
 
+enum kt_cell_type kt_file_get_cell_type(struct kt_file *file, size_t row) {
+    return file->type_info[row];
+}
+
 i64 kt_file_get_int(struct kt_file *file, size_t row) {
     return file->data.as_i64[row];
 }

@@ -50,5 +50,6 @@ void kt_file_set_float(struct kt_file *file, size_t row, double value);
 /* get value from memory segment */
 i64 kt_file_get_int(struct kt_file *file, size_t row);
 f64 kt_file_get_float(struct kt_file *file, size_t row);
+enum kt_cell_type kt_file_get_cell_type(struct kt_file *file, size_t row);
 
 #endif /* KT_FILE_H */

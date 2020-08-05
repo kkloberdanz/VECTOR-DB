@@ -79,6 +79,27 @@ pub fn file_get_float(file: &VecFile, row: u64) -> f64 {
     x
 }
 
+#[derive(Debug)]
+pub enum CellType {
+    Nil,
+    Invalid,
+    Int,
+    Float,
+    Str
+}
+
+pub fn file_get_cell_type(file: &VecFile, row: u64) -> CellType {
+    let x = unsafe { kt_file_get_cell_type(file.ptr, row) };
+    match x {
+        0 => CellType::Nil,
+        1 => CellType::Invalid,
+        2 => CellType::Int,
+        3 => CellType::Float,
+        4 => CellType::Str,
+        _ => CellType::Invalid
+    }
+}
+
 pub fn sum(file: &VecFile, begin: u64, end: u64, dst: u64) -> i32 {
     let x = unsafe { kt_sum(file.ptr, begin, end, dst) };
     x
