@@ -43,14 +43,18 @@ let handle_change = (col, row, value) => {
   }
 };
 
-let changed = (instance, cell, col, row, value) => {
-  handle_change(col, row, value);
+let retry_updates = () => {
   Object.keys(failed_updates).map((key) => {
     const v = failed_updates[key];
     const [c, r] = key.split(",");
     console.log(`retrying: ${c} ${r} ${v}`);
     handle_change(c, r, v);
   });
+};
+
+let changed = (instance, cell, col, row, value) => {
+  handle_change(col, row, value);
+  retry_updates();
 };
 
 let data = [
