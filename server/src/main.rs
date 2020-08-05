@@ -95,11 +95,7 @@ fn set_int(
 }
 
 #[post("/clear/<table>/<col>/<row>")]
-fn clear_cell(
-    table: String,
-    col: u64,
-    row: u64,
-) -> Result<String, String> {
+fn clear_cell(table: String, col: u64, row: u64) -> Result<String, String> {
     let file = get_file(&table, col, row)?;
     vecstorage::file_set_nil(&file, row);
     Ok("ok".to_string())
@@ -200,8 +196,16 @@ fn main() {
         .mount(
             "/",
             routes![
-                hello, get_cell_type, get_int, get_float, set_int, set_float, sum, mean,
-                product, clear_cell
+                hello,
+                get_cell_type,
+                get_int,
+                get_float,
+                set_int,
+                set_float,
+                sum,
+                mean,
+                product,
+                clear_cell
             ],
         )
         .launch();

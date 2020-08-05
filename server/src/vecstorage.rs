@@ -85,7 +85,7 @@ pub enum CellType {
     Invalid,
     Int,
     Float,
-    Str
+    Str,
 }
 
 pub fn file_get_cell_type(file: &VecFile, row: u64) -> CellType {
@@ -96,7 +96,7 @@ pub fn file_get_cell_type(file: &VecFile, row: u64) -> CellType {
         2 => CellType::Int,
         3 => CellType::Float,
         4 => CellType::Str,
-        _ => CellType::Invalid
+        _ => CellType::Invalid,
     }
 }
 
