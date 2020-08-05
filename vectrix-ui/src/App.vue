@@ -12,14 +12,14 @@ import jexcel from "jexcel";
 import "jexcel/dist/jexcel.css";
 import axios from "axios";
 
-let failed_updates = [];
+let failed_updates = {};
 
 let is_number = (n) => {
   return !isNaN(n);
 };
 
 let handle_change = (col, row, value) => {
-  console.log(`[${col}, ${row}] = ${value}::${typeof value}`);
+  console.log(`[${col},${row}] = ${value}::${typeof value}`);
   const path =
     value === ""
       ? `http://localhost:8000/clear/example/${col}/${row}`
@@ -28,24 +28,29 @@ let handle_change = (col, row, value) => {
       : ""; /* TODO: how to add strings? */
 
   if (path !== "") {
+    const key = `${col},${row}`;
     axios
       .post(path, {})
-      .then((response) => console.log(response))
+      .then((response) => {
+        console.log(`successfully updated [${key}] = ${value}`);
+        console.log(response);
+        delete failed_updates[key];
+      })
       .catch((error) => {
         console.log(error);
-        console.log("all failed_updates:", failed_updates);
-        failed_updates.push({
-          col: col,
-          row: row,
-          value: value,
-        });
+        failed_updates[key] = value;
       });
   }
 };
 
 let changed = (instance, cell, col, row, value) => {
   handle_change(col, row, value);
-  failed_updates.map((obj) => handle_change(obj.col, obj.row, obj.value));
+  Object.keys(failed_updates).map((key) => {
+    const v = failed_updates[key];
+    const [c, r] = key.split(",");
+    console.log(`retrying: ${c} ${r} ${v}`);
+    handle_change(c, r, v);
+  });
 };
 
 let data = [
