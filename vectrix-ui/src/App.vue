@@ -186,6 +186,9 @@ export default {
   mounted: function () {
     let spreadsheet = jexcel(this.$el, options);
     Object.assign(this, { spreadsheet });
+    window.setInterval(() => {
+      retry_updates();
+    }, 10000);
   },
 };
 </script>
