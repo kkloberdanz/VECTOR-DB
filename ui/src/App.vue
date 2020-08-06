@@ -108,7 +108,6 @@ let load = (spreadsheet, x, y) => {
   axios
     .get(url)
     .then((response) => {
-      console.log(response);
       response.data.forEach((cell) => {
         spreadsheet.setValue(
           col_index_to_name(cell.col) + (cell.row + 1),
