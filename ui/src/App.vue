@@ -101,47 +101,23 @@ let focus = (instance) => {
 let load = (spreadsheet, x, y) => {
   const start_x = x - load_chunk > 0 ? x - load_chunk : 0;
   const start_y = y - load_chunk > 0 ? y - load_chunk : 0;
-  for (let col = start_x; col < x + load_chunk; col++) {
-    for (let row = start_y; row < y + load_chunk; row++) {
-      axios
-        .get(`http://${host}/get/type/${table}/${col}/${row}`)
-        .then((response) => {
-          const type = response.data;
-          let url = null;
-          switch (type) {
-            case "Nil":
-              spreadsheet.setValue(
-                col_index_to_name(col) + (row + 1),
-                "",
-                true
-              );
-              break;
+  const end_x = x + load_chunk;
+  const end_y = y + load_chunk;
+  const url = `http://${host}/get/range/${table}/${start_x}/${end_x}/${start_y}/${end_y}`;
 
-            case "Float":
-              url = `http://${host}/get/float/${table}/${col}/${row}`;
-              break;
-
-            case "Int":
-              url = `http://${host}/get/int/${table}/${col}/${row}`;
-              break;
-
-            default:
-              break;
-          }
-
-          if (url) {
-            axios.get(url).then((rsp) => {
-              spreadsheet.setValue(
-                col_index_to_name(col) + (row + 1),
-                rsp.data,
-                true
-              );
-            });
-          }
-        })
-        .catch((err) => console.log(err));
-    }
-  }
+  axios
+    .get(url)
+    .then((response) => {
+      console.log(response);
+      response.data.forEach((cell) => {
+        spreadsheet.setValue(
+          col_index_to_name(cell.col) + (cell.row + 1),
+          cell.data,
+          true
+        );
+      });
+    })
+    .catch((err) => console.log(err));
 };
 
 let data = [];

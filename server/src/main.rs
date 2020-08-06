@@ -64,12 +64,13 @@ fn get_range(
     if row_begin > row_end || col_begin > col_end {
         return Err(String::from("begin must be less than end"));
     }
-    let mut records = Vec::new();
+    let capacity: usize = ((row_end as usize) - (row_begin as usize))
+        * ((col_end as usize) - (col_begin as usize));
+    let mut records = Vec::with_capacity(capacity);
     for col in col_begin..=col_end {
         let file = get_file(&table, col, row_begin);
         match file {
             Ok(f) => {
-                let mut column = Vec::new();
                 for row in row_begin..=row_end {
                     let celltype = vecstorage::file_get_cell_type(&f, row);
                     let data = match celltype {
@@ -87,14 +88,10 @@ fn get_range(
                         row: row,
                         col: col,
                     };
-                    column.push(cell);
+                    records.push(cell);
                 }
-                records.push(column);
             }
             Err(_) => {
-                let capacity: usize =
-                    (row_end as usize) - (row_begin as usize);
-                let mut column = Vec::with_capacity(capacity);
                 for row in row_begin..=row_end {
                     let cell = Cell {
                         celltype: CellType::Nil,
@@ -102,9 +99,8 @@ fn get_range(
                         row: row,
                         col: col,
                     };
-                    column.push(cell);
+                    records.push(cell);
                 }
-                records.push(column);
             }
         }
     }
