@@ -11,10 +11,12 @@ extern crate libc;
 mod vecstorage;
 
 use rocket::response::status::BadRequest;
+use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::panic;
 use std::process;
 use std::sync::Mutex;
+use vecstorage::CellType;
 
 lazy_static! {
     static ref FILES: Mutex<HashMap<String, vecstorage::VecFile>> =
@@ -41,6 +43,76 @@ fn get_file(
 #[get("/hello")]
 fn hello() -> String {
     format!("hello world!")
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct Cell {
+    celltype: CellType,
+    data: String,
+    row: u64,
+    col: u64,
+}
+
+#[get("/get/range/<table>/<col_begin>/<col_end>/<row_begin>/<row_end>")]
+fn get_range(
+    table: String,
+    col_begin: u64,
+    col_end: u64,
+    row_begin: u64,
+    row_end: u64,
+) -> Result<String, String> {
+    if row_begin > row_end || col_begin > col_end {
+        return Err(String::from("begin must be less than end"));
+    }
+    let mut records = Vec::new();
+    for col in col_begin..=col_end {
+        let file = get_file(&table, col, row_begin);
+        match file {
+            Ok(f) => {
+                let mut column = Vec::new();
+                for row in row_begin..=row_end {
+                    let celltype = vecstorage::file_get_cell_type(&f, row);
+                    let data = match celltype {
+                        CellType::Int => {
+                            vecstorage::file_get_int(&f, row).to_string()
+                        }
+                        CellType::Float => {
+                            vecstorage::file_get_float(&f, row).to_string()
+                        }
+                        _ => String::new(),
+                    };
+                    let cell = Cell {
+                        celltype: celltype,
+                        data: data,
+                        row: row,
+                        col: col,
+                    };
+                    column.push(cell);
+                }
+                records.push(column);
+            }
+            Err(_) => {
+                let capacity: usize =
+                    (row_end as usize) - (row_begin as usize);
+                let mut column = Vec::with_capacity(capacity);
+                for row in row_begin..=row_end {
+                    let cell = Cell {
+                        celltype: CellType::Nil,
+                        data: String::new(),
+                        row: row,
+                        col: col,
+                    };
+                    column.push(cell);
+                }
+                records.push(column);
+            }
+        }
+    }
+
+    match serde_json::to_string(&records) {
+        Ok(j) => Ok(j),
+        Err(e) => Err(format!("failed to serialize json: {}", e)),
+    }
 }
 
 #[get("/get/int/<table>/<col>/<row>")]
@@ -199,6 +271,7 @@ fn main() {
                 hello,
                 get_cell_type,
                 get_int,
+                get_range,
                 get_float,
                 set_int,
                 set_float,

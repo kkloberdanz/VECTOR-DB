@@ -2,6 +2,7 @@
 #![allow(non_camel_case_types)]
 #![allow(non_snake_case)]
 
+use serde::{Deserialize, Serialize};
 use std::ffi::CStr;
 use std::ffi::CString;
 
@@ -79,7 +80,7 @@ pub fn file_get_float(file: &VecFile, row: u64) -> f64 {
     x
 }
 
-#[derive(Debug)]
+#[derive(Serialize, Deserialize, Debug, Copy, Clone)]
 pub enum CellType {
     Nil,
     Invalid,
