@@ -16,6 +16,9 @@ let table = "example";
 let host = "192.168.0.109:8000";
 let failed_updates = {};
 
+let ref_x = 0;
+let ref_y = 0;
+
 let is_number = (n) => {
   return !isNaN(n);
 };
@@ -73,6 +76,8 @@ const load_chunk = 10;
 
 /* eslint-disable no-unused-vars */
 let selectionActive = (instance, x1, y1, x2, y2, origin) => {
+  ref_x = x1;
+  ref_y = y1;
   load(instance.jexcel, x1, y1);
   /*
   console.log(instance.max_y, y1, instance.max_x, x1);
@@ -142,8 +147,9 @@ export default {
     Object.assign(this, { spreadsheet });
     load(spreadsheet, 0, 0);
     window.setInterval(() => {
+      load(spreadsheet, ref_x, ref_y);
       retry_updates();
-    }, 60000);
+    }, 10000);
   },
 };
 </script>
