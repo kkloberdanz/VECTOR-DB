@@ -68,7 +68,9 @@ let retry_updates = () => {
 };
 
 let changed = (instance, cell, col, row, value) => {
-  handle_change(col, row, value);
+  if (col == ref_x && row == ref_y) {
+    handle_change(col, row, value);
+  }
   retry_updates();
 };
 
@@ -114,11 +116,14 @@ let load = (spreadsheet, x, y) => {
     .get(url)
     .then((response) => {
       response.data.forEach((cell) => {
-        spreadsheet.setValue(
-          col_index_to_name(cell.col) + (cell.row + 1),
-          cell.data,
-          true
-        );
+        const cell_name = col_index_to_name(cell.col) + (cell.row + 1);
+        if (spreadsheet.getValue(cell_name) !== cell.data) {
+          spreadsheet.setValue(
+            cell_name,
+            cell.data,
+            true
+          );
+        }
       });
     })
     .catch((err) => console.log(err));
