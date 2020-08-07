@@ -4,6 +4,10 @@
     <div>
       <input type="button" value="Add new row" @click="() => spreadsheet.insertRow()" />
     </div>
+    <div>
+      <input v-model="table" placeholder="edit me" />
+      <p>Table: {{ table }}</p>
+    </div>
   </div>
 </template>
 
@@ -74,7 +78,7 @@ let changed = (instance, cell, col, row, value) => {
   retry_updates();
 };
 
-const load_chunk = 10;
+const load_chunk = 40;
 
 /* eslint-disable no-unused-vars */
 let selectionActive = (instance, x1, y1, x2, y2, origin) => {
@@ -118,11 +122,7 @@ let load = (spreadsheet, x, y) => {
       response.data.forEach((cell) => {
         const cell_name = col_index_to_name(cell.col) + (cell.row + 1);
         if (spreadsheet.getValue(cell_name) !== cell.data) {
-          spreadsheet.setValue(
-            cell_name,
-            cell.data,
-            true
-          );
+          spreadsheet.setValue(cell_name, cell.data, true);
         }
       });
     })
@@ -137,9 +137,6 @@ let options = {
   onchange: changed,
   onselection: selectionActive,
   onfocus: focus,
-  lazyLoading: true,
-  tableOverflow: true,
-  fullscreen: true,
   minDimensions: [48, 1000],
   colWidths: [120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120],
   columns: [],
@@ -147,7 +144,7 @@ let options = {
 
 export default {
   name: "App",
-  mounted: function () {
+  mounted() {
     let spreadsheet = jexcel(this.$el, options);
     Object.assign(this, { spreadsheet });
     load(spreadsheet, 0, 0);
