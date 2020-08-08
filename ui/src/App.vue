@@ -121,7 +121,9 @@ let load = (spreadsheet, x, y) => {
     .then((response) => {
       response.data.forEach((cell) => {
         const cell_name = col_index_to_name(cell.col) + (cell.row + 1);
-        if (spreadsheet.getValue(cell_name) !== cell.data) {
+        const will_set_value =
+          spreadsheet.getValue(cell_name) !== cell.data || cell.data === "";
+        if (will_set_value) {
           spreadsheet.setValue(cell_name, cell.data, true);
         }
       });
