@@ -45,11 +45,21 @@ static int kt_file_set_segment_pointers(struct kt_file *file) {
     return 0;
 }
 
-int kt_file_free(struct kt_file *file) {
+int kt_file_sync(struct kt_file *file) {
     if (file) {
         if (msync(file->dat, file->map_size, MS_SYNC) == -1) {
             perror("failed to write to disk");
             return -1;
+        }
+    }
+    return 0;
+}
+
+int kt_file_free(struct kt_file *file) {
+    if (file) {
+        int ret = kt_file_sync(file);
+        if (ret < 0) {
+            return ret;
         }
 
         if (munmap(file->dat, file->map_size)) {
@@ -148,13 +158,6 @@ close_fd:
 fail:
     return NULL;
 }
-
-enum State {
-    TABLE_NAME,
-    COL_NAME,
-    ROW_BEGIN,
-    ROW_END
-};
 
 /*
  * get the name of the file that contains the table at the given row and col

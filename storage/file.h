@@ -40,6 +40,7 @@ struct kt_file {
 };
 
 int kt_file_free(struct kt_file *file);
+int kt_file_sync(struct kt_file *file);
 
 struct kt_file *kt_find_file(const char *table, size_t col, size_t row);
 
