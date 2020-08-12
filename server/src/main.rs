@@ -10,22 +10,22 @@ extern crate libc;
 
 mod vecstorage;
 
+use rocket::http::ContentType;
+use rocket::http::Method;
+use rocket::http::Status;
 use rocket::response::status::BadRequest;
+use rocket::response::Response;
+use rocket::{get, routes};
 use rocket_cors;
 use rocket_cors::{AllowedHeaders, AllowedOrigins, Error};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::collections::HashSet;
+use std::io::Cursor;
 use std::panic;
 use std::process;
 use std::sync::Mutex;
 use vecstorage::CellType;
-use rocket::http::Method;
-use rocket::{get, routes};
-use std::io::Cursor;
-use rocket::http::ContentType;
-use rocket::http::Status;
-use rocket::response::Response;
 
 lazy_static! {
     static ref FILES: Mutex<HashMap<String, vecstorage::VecFile>> =
