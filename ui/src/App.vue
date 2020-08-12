@@ -75,7 +75,6 @@ let changed = (instance, cell, col, row, value) => {
   if (col == ref_x && row == ref_y) {
     handle_change(col, row, value);
   }
-  retry_updates();
 };
 
 const load_chunk = 40;
