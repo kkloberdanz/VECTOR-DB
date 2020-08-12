@@ -11,12 +11,21 @@ extern crate libc;
 mod vecstorage;
 
 use rocket::response::status::BadRequest;
+use rocket_cors;
+use rocket_cors::{AllowedHeaders, AllowedOrigins, Error};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
+use std::collections::HashSet;
 use std::panic;
 use std::process;
 use std::sync::Mutex;
 use vecstorage::CellType;
+use rocket::http::Method;
+use rocket::{get, routes};
+use std::io::Cursor;
+use rocket::http::ContentType;
+use rocket::http::Status;
+use rocket::response::Response;
 
 lazy_static! {
     static ref FILES: Mutex<HashMap<String, vecstorage::VecFile>> =
@@ -235,6 +244,38 @@ fn product(
     }
 }
 
+#[options("/")]
+fn options_handler<'a>() -> Response<'a> {
+    let mut res = Response::new();
+    res.set_status(Status::new(200, "No Content"));
+    res.adjoin_header(ContentType::Plain);
+    res.adjoin_raw_header(
+        "Access-Control-Allow-Methods",
+        "POST, GET, OPTIONS",
+    );
+    res.adjoin_raw_header("Access-Control-Allow-Origin", "*");
+    res.adjoin_raw_header("Access-Control-Allow-Credentials", "true");
+    res.adjoin_raw_header("Access-Control-Allow-Headers", "Content-Type");
+    res.set_sized_body(Cursor::new("Response"));
+    res
+}
+
+#[get("/")]
+fn get_handler<'a>() -> Response<'a> {
+    let mut res = Response::new();
+    res.set_status(Status::new(200, "No Content"));
+    res.adjoin_header(ContentType::Plain);
+    res.adjoin_raw_header(
+        "Access-Control-Allow-Methods",
+        "POST, GET, OPTIONS",
+    );
+    res.adjoin_raw_header("Access-Control-Allow-Origin", "*");
+    res.adjoin_raw_header("Access-Control-Allow-Credentials", "true");
+    res.adjoin_raw_header("Access-Control-Allow-Headers", "Content-Type");
+    res.set_sized_body(Cursor::new("Response"));
+    res
+}
+
 fn cleanup_cache() {
     let mut files = FILES.lock().unwrap();
     for (_, file) in files.iter() {
@@ -249,7 +290,29 @@ fn sigint_handler() {
     process::exit(0);
 }
 
-fn main() {
+fn main() -> Result<(), Error> {
+    let mut headers = HashSet::new();
+    headers.insert(String::from("Access-Control-Allow-Origin: *"));
+    let allowed_origins = AllowedOrigins::some_exact(&[
+        "http://192.168.0.109:8000/*",
+        "http://192.168.0.109:8080/*",
+        "http://*",
+    ]);
+
+    //let cors = rocket_cors::CorsOptions::default().to_cors()?;
+    let cors = rocket_cors::CorsOptions {
+        allowed_origins,
+        allowed_methods: vec![Method::Get, Method::Post]
+            .into_iter()
+            .map(From::from)
+            .collect(),
+        allowed_headers: AllowedHeaders::some(&["All"]),
+        expose_headers: headers,
+        allow_credentials: true,
+        ..Default::default()
+    }
+    .to_cors()?;
+
     ctrlc::set_handler(move || sigint_handler())
         .expect("Error setting Ctrl-C handler");
 
@@ -274,12 +337,17 @@ fn main() {
                 sum,
                 mean,
                 product,
-                clear_cell
+                clear_cell,
+                get_handler,
+                options_handler,
             ],
         )
+        //.mount("/", rocket_cors::catch_all_options_routes())
+        .attach(cors)
         .launch();
 
     cleanup_cache();
+    Ok(())
 }
 
 #[cfg(test)]
